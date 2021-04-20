@@ -1,18 +1,62 @@
-﻿@inherits LayoutComponentBase
+﻿@inject NavigationManager NavigationManager
+
+@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <div class="main">
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+    @*<AuthorizeView>
+        <Authorized>*@
+            <MudLayout>
+                <MudAppBar Elevation="1" Dense="@dense">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" @onclick="ToggleDrawer" />
+                    <MudAppBarSpacer />
+                    <MudDrawerContainer><LoginDisplay /></MudDrawerContainer>
+                </MudAppBar>
+                <MudDrawer @bind-Open="@open" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Responsive" Class="mudblazor-appbar-band">
+                    <MudDrawerHeader>
+                        <MudLink Href="/" Class="w-100"><MudCardMedia Image="images/brain.png" Height="75" Class="w-100" Style="background-size: contain;" /></MudLink>
+                    </MudDrawerHeader>
+                    <MudNavMenu>
+                        <MudNavLink Href="/" Icon="@Icons.Filled.TableChart">Home</MudNavLink>
+                        <MudNavLink Href="/counter">Counter</MudNavLink>
+                        <MudNavLink Href="/fetchdata">Weather Forecast</MudNavLink>
+                    </MudNavMenu>
+                </MudDrawer>
+                <MudMainContent Class="main">
+                    <MudContainer Class="content px-4">
+                        @Body
+                    </MudContainer>
+                </MudMainContent>
+            </MudLayout>
+        @*</Authorized>*@
 
-        <div class="content px-4">
-            @Body
-        </div>
-    </div>
+        @*<NotAuthorized>
+            <div class="content px-4">
+                @Body
+            </div>
+        </NotAuthorized>*@
+    @*</AuthorizeView>*@
 </div>
+
+@code{
+    [CascadingParameter] protected Task<AuthenticationState> AuthStat { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var user = (await AuthStat).User;
+        //if (!user.Identity.IsAuthenticated)
+        //{
+        //    NavigationManager.NavigateTo($"authentication/login");
+        //}
+    }
+
+    bool open = true;
+    bool dense = false;
+    DrawerClipMode clipMode = DrawerClipMode.Never;
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+}

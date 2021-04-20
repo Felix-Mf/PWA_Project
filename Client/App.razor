@@ -1,3 +1,7 @@
+<MudThemeProvider Theme="CustomTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
         <Found Context="routeData">
@@ -21,3 +25,15 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code{
+    MudTheme CustomTheme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Primary = "#000000",
+            Secondary = "#000000",
+            AppbarBackground = "#00be9b"
+        }
+    };
+}

@@ -1,0 +1,22 @@
+﻿.nav-link {
+    margin: auto;
+    padding: 10px 25%;
+}
+
+.nav-account {
+    float: right;
+}
+
+.dropdown-item.active, .dropdown-item:active, .nav-no-bg:hover {
+    background-color: #ffffff !important;
+}
+
+.nav-account .btn-nav-account {
+    font-size: 1.4em;
+    color: #ff5722;
+    background-color: #ff794e3b;
+    font-weight: bold;
+    height: 55px;
+    border: none;
+    width: 55px;
+}

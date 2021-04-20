@@ -6,12 +6,31 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, @context.User.Identity.Name!</a>
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+        <div class="noselect nav-account">
+
+            <MudMenu PositionAtCurser="false" Direction="Direction.Bottom" OffsetY="true">
+                <ActivatorContent>
+                    <MudAvatar Size="Size.Medium" Color="Color.Primary" Class="ma-2">@context.User.Identity.Name.Substring(0, 1).ToUpper()</MudAvatar>
+                    @context.User.Identity.Name
+                    <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" />
+                </ActivatorContent>
+                <ChildContent>
+                    <MudContainer>
+                        <MudAvatar Size="Size.Medium" Color="Color.Primary" Class="ma-2">@context.User.Identity.Name.Substring(0, 1).ToUpper()</MudAvatar>
+                        @context.User.Identity.Name
+                    </MudContainer>
+
+                    <MudMenuItem Link="authentication/profile" Class="text-center">Mein Account</MudMenuItem>
+                    <MudMenuItem><button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button></MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+
+        </div>
     </Authorized>
+
     <NotAuthorized>
-        <a href="authentication/register">Register</a>
-        <a href="authentication/login">Log in</a>
+        <MudLink Href="authentication/register" Underline="Underline.None">Register</MudLink>
+        <MudLink Href="authentication/login" Underline="Underline.None">Login</MudLink>
     </NotAuthorized>
 </AuthorizeView>
 

@@ -1,21 +1,20 @@
-﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+﻿@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap');
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-a, .btn-link {
-    color: #0366d6;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    font-family: 'Quicksand', sans-serif !important;
+    background-color: var(--mud-palette-background-grey) !important;
 }
 
 .content {
     padding-top: 1.1rem;
+}
+
+hr {
+    height: 0 !important;
+}
+
+.mud-table-hover .mud-table-body .mud-table-row:hover {
+    cursor: pointer;
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -28,6 +27,34 @@ a, .btn-link {
 
 .validation-message {
     color: red;
+}
+
+.app-loader {
+    width: 100px;
+    height: 50px;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-left: -50px;
+    margin-top: -25px;
+}
+
+.top-loader {
+    position: absolute !important;
+    top: 36px;
+    width: 100%;
+    left: 0;
+}
+
+.mudblazor-appbar-band {
+    background-image: url(../images/MudAppbarCorner.svg);
+    background-repeat: no-repeat;
+    background-position: top right;
+    overflow: hidden;
+}
+
+progress {
+    width: 100% !important;
 }
 
 #blazor-error-ui {
@@ -48,3 +75,26 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.pointer-event {
+    cursor: pointer;
+}
+
+.dropdown-menu, .card {
+    border: none !important;
+    box-shadow: 0 24px 54px rgb(0 0 0 / 15%), 0 4.5px 13.5px rgb(0 0 0 / 8%);
+    border-radius: .1rem !important;
+}
+
+.fa, .fas {
+    margin-right: 10px;
+}

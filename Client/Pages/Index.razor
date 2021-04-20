@@ -1,7 +1,13 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<MudCard Elevation="1">
+    <MudCardContent>
+        <MudText>Hallo Hallo</MudText>
+        <MudText Typo="Typo.body2">Hallo</MudText>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+        <MudCardMedia Image="images/education.png" Height="500" Class="w-100" Style="background-size: contain;" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Link="/counter" Variant="Variant.Text" Color="Color.Primary">Counter öffnen</MudButton>
+    </MudCardActions>
+</MudCard>
