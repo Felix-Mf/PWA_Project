@@ -6,10 +6,12 @@ using System.Text;
 
 namespace PWA_Project.Shared
 {
-    public class Question
+    public class Input
     {
-        public Question()
+        public Input()
         {
+            Test = new HashSet<Test>();
+            Question = new HashSet<Question>();
             Answer = new HashSet<Answer>();
         }
 
@@ -21,12 +23,13 @@ namespace PWA_Project.Shared
         public int TestId { get; set; }
 
         [Required]
-        public string Text { get; set; }
+        public int QuestionId { get; set; }
 
-        public string ImagePath { get; set; }
+        [Required]
+        public int AnswerId { get; set; }
 
-        public string VideoPath { get; set; }
-
+        public virtual ICollection<Test> Test { get; set; }
+        public virtual ICollection<Question> Question { get; set; }
         public virtual ICollection<Answer> Answer { get; set; }
     }
 }

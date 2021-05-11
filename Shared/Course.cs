@@ -6,21 +6,22 @@ using System.Text;
 
 namespace PWA_Project.Shared
 {
-    public class Answer
+    public class Course
     {
+        public Course()
+        {
+            Test = new HashSet<Test>();
+        }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
 
         [Required]
-        public int QuestionId { get; set; }
+        public string Titel { get; set; }
 
-        [Required]
-        public string Text { get; set; }
+        public string Description { get; set; }
 
-        [Required]
-        public Boolean Correct { get; set; }
-
-        public virtual Question Question { get; set; }
+        public virtual ICollection<Test> Test { get; set; }
     }
 }
