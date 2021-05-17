@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PWA_Project.Server.Data;
 using PWA_Project.Shared;
@@ -25,7 +26,7 @@ namespace PWA_Project.Server.Controllers
         [HttpGet]
         public IEnumerable<Course> GetAll()
         {
-            return db.Course;
+            return db.Course.OrderBy(x => x.Titel);
         }
 
         [HttpGet]

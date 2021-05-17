@@ -18,14 +18,16 @@ namespace PWA_Project.Shared
         public int Id { get; set; }
 
         [Required]
-        public int TestId { get; set; }
-
-        [Required]
         public string Text { get; set; }
 
         public string ImagePath { get; set; }
 
         public string VideoPath { get; set; }
+
+        [Required]
+        public int TestId { get; set; }
+
+        public virtual Test Test { get; set; }
 
         public virtual ICollection<Answer> Answer { get; set; }
     }

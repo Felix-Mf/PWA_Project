@@ -13,13 +13,13 @@ namespace PWA_Project.Shared
         public int Id { get; set; }
 
         [Required]
-        public int QuestionId { get; set; }
-
-        [Required]
         public string Text { get; set; }
 
         [Required]
         public Boolean Correct { get; set; }
+
+        [Required]
+        public int QuestionId { get; set; }
 
         public virtual Question Question { get; set; }
     }

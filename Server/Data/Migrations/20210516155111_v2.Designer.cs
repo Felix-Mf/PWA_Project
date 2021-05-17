@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PWA_Project.Server.Data;
 
 namespace PWA_Project.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210516155111_v2")]
+    partial class v2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -324,6 +326,9 @@ namespace PWA_Project.Server.Data.Migrations
                     b.Property<bool>("Correct")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("InputId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("QuestionId")
                         .HasColumnType("INTEGER");
 
@@ -332,6 +337,8 @@ namespace PWA_Project.Server.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InputId");
 
                     b.HasIndex("QuestionId");
 
@@ -373,12 +380,6 @@ namespace PWA_Project.Server.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnswerId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.HasIndex("TestId");
-
                     b.ToTable("Input");
                 });
 
@@ -390,6 +391,9 @@ namespace PWA_Project.Server.Data.Migrations
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("InputId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TestId")
                         .HasColumnType("INTEGER");
@@ -403,6 +407,8 @@ namespace PWA_Project.Server.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InputId");
+
                     b.HasIndex("TestId");
 
                     b.ToTable("Question");
@@ -414,7 +420,7 @@ namespace PWA_Project.Server.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CourseId")
+                    b.Property<int?>("CourseId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date_max")
@@ -426,6 +432,9 @@ namespace PWA_Project.Server.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("InputId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Titel")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -433,6 +442,8 @@ namespace PWA_Project.Server.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("InputId");
 
                     b.ToTable("Test");
                 });
@@ -490,6 +501,10 @@ namespace PWA_Project.Server.Data.Migrations
 
             modelBuilder.Entity("PWA_Project.Shared.Answer", b =>
                 {
+                    b.HasOne("PWA_Project.Shared.Input", null)
+                        .WithMany("Answer")
+                        .HasForeignKey("InputId");
+
                     b.HasOne("PWA_Project.Shared.Question", "Question")
                         .WithMany("Answer")
                         .HasForeignKey("QuestionId")
@@ -499,57 +514,41 @@ namespace PWA_Project.Server.Data.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("PWA_Project.Shared.Input", b =>
-                {
-                    b.HasOne("PWA_Project.Shared.Answer", "Answer")
-                        .WithMany()
-                        .HasForeignKey("AnswerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PWA_Project.Shared.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PWA_Project.Shared.Test", "Test")
-                        .WithMany()
-                        .HasForeignKey("TestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Answer");
-
-                    b.Navigation("Question");
-
-                    b.Navigation("Test");
-                });
-
             modelBuilder.Entity("PWA_Project.Shared.Question", b =>
                 {
-                    b.HasOne("PWA_Project.Shared.Test", "Test")
+                    b.HasOne("PWA_Project.Shared.Input", null)
+                        .WithMany("Question")
+                        .HasForeignKey("InputId");
+
+                    b.HasOne("PWA_Project.Shared.Test", null)
                         .WithMany("Question")
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Test");
                 });
 
             modelBuilder.Entity("PWA_Project.Shared.Test", b =>
                 {
-                    b.HasOne("PWA_Project.Shared.Course", "Course")
+                    b.HasOne("PWA_Project.Shared.Course", null)
                         .WithMany("Test")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CourseId");
 
-                    b.Navigation("Course");
+                    b.HasOne("PWA_Project.Shared.Input", null)
+                        .WithMany("Test")
+                        .HasForeignKey("InputId");
                 });
 
             modelBuilder.Entity("PWA_Project.Shared.Course", b =>
                 {
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("PWA_Project.Shared.Input", b =>
+                {
+                    b.Navigation("Answer");
+
+                    b.Navigation("Question");
+
                     b.Navigation("Test");
                 });
 

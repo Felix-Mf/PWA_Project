@@ -18,7 +18,7 @@ namespace PWA_Project.Server
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 if (db.Database.CanConnect())
                 {
-                    SeedData.Initialize(db);
+                    //SeedData.Initialize(db);
                 }
             }
 

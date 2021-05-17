@@ -1,4 +1,4 @@
-﻿@page "/course"
+﻿@page "/test"
 
 @using PWA_Project.Shared
 @using System.Net.Http
@@ -6,11 +6,22 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-@if (Courses != null)
+@if (Tests != null)
 {
-    <MudTable OnRowClick="@OnRowClick" T="Course" Items="@Courses" Hover="true" Filter="new Func<Course, bool>(FilterFunc)">
+    <MudItem xs="12" md="12" sm="12">
+        <MudSelect T="int" Label="Course Filter" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true" ValueChanged="OnSelectedValue">
+            <MudSelectItem Value="@(0)">All Courses</MudSelectItem>
+
+            @foreach (Course c in Courses)
+            {
+                <MudSelectItem Value="@(c.Id)">@c.Titel</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <br />
+    <MudTable OnRowClick="@OnRowClick" T="Test" Items="@Tests" Hover="true" Filter="new Func<Test, bool>(FilterFunc)">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Courses</MudText>
+            <MudText Typo="Typo.h6">Tests</MudText>
             <MudToolBarSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
@@ -18,21 +29,25 @@
             <MudTh>Id</MudTh>
             <MudTh>Titel</MudTh>
             <MudTh>Description</MudTh>
+            <MudTh>Start Date</MudTh>
+            <MudTh>End Date</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Titel">@context.Titel</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteCourse(context))"></MudIconButton></MudTd>
+            <MudTd DataLabel="Start Date">@context.Date_min.Value.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="End Date">@context.Date_max.Value.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteTest(context))"></MudIconButton></MudTd>
         </RowTemplate>
     </MudTable>
     <br />
-    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddCourse" />
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddTest" />
 }
 else if (notFound)
 {
-    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddCourse" />
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddTest" />
 }
 else
 {
@@ -45,7 +60,9 @@ else
 @code
 {
     private List<Course> Courses;
+    private List<Test> Tests;
     private Course cCourse;
+    private Test cTest;
     private string SearchName = "";
     private string ErrorMessage = "";
     private string searchString = "";
@@ -54,6 +71,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await GetCourses();
+        await OnSelectedValue(0);
     }
 
     private async Task GetCourses()
@@ -66,8 +84,6 @@ else
             {
                 Courses = result.ToList<Course>();
             }
-
-            notFound = (Courses == null);
         }
         catch (Exception ex)
         {
@@ -75,52 +91,84 @@ else
         }
     }
 
-    private async Task AddCourse()
+    private async Task GetTests()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Test[]>("api/Test/GetAll");
+
+            if (result != null)
+            {
+                Tests = result.ToList<Test>();
+            }
+
+            notFound = (Tests == null);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task AddTest()
     {
         var parameters = new DialogParameters();
-        parameters.Add("course", null);
+        parameters.Add("test", null);
         parameters.Add("action", "Add");
 
-        var dialog = DialogService.Show<CoursePopup>("Add Course", parameters);
+        var dialog = DialogService.Show<TestPopup>("Add Test", parameters);
         var result = await dialog.Result;
 
         if (!result.Cancelled)
         {
-            await GetCourses();
+            await GetTests();
         }
     }
 
-    private async Task DeleteCourse(Course tCourse)
+    private async Task DeleteTest(Test tTest)
     {
         var parameters = new DialogParameters();
-        parameters.Add("course", tCourse);
+        parameters.Add("test", tTest);
         parameters.Add("action", "Delete");
 
-        var dialog = DialogService.Show<CoursePopup>("Delete Course", parameters);
+        var dialog = DialogService.Show<TestPopup>("Delete Test", parameters);
         var result = await dialog.Result;
 
         if (!result.Cancelled)
         {
-            await GetCourses();
+            await GetTests();
         }
     }
 
-    private async Task OnRowClick(TableRowClickEventArgs<Course> tCourse)
+    private async Task OnRowClick(TableRowClickEventArgs<Test> tTest)
     {
         var parameters = new DialogParameters();
-        parameters.Add("course", tCourse.Item);
+        parameters.Add("test", tTest.Item);
         parameters.Add("action", "Update");
 
-        var dialog = DialogService.Show<CoursePopup>("Update Course", parameters);
+        var dialog = DialogService.Show<TestPopup>("Update Test", parameters);
         var result = await dialog.Result;
 
         if (!result.Cancelled)
         {
-            await GetCourses();
+            await GetTests();
         }
     }
 
-    private bool FilterFunc(Course element)
+    private async Task OnSelectedValue(int tCourse)
+    {
+        if (tCourse == 0)
+        {
+            await GetTests();
+        }
+        else
+        {
+            await GetTests();
+            Tests = Tests.Where(x => x.CourseId == tCourse).ToList();
+        }
+    }
+
+    private bool FilterFunc(Test element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;

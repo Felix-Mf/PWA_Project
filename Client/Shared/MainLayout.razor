@@ -17,7 +17,9 @@
                         <MudLink Href="/" Class="w-100"><MudCardMedia Image="images/brain.png" Height="75" Class="w-100" Style="background-size: contain;" /></MudLink>
                     </MudDrawerHeader>
                     <MudNavMenu>
-                        <MudNavLink Href="/" Icon="@Icons.Filled.TableChart">Home</MudNavLink>
+                        <MudNavLink Href="/" Icon="@Icons.Filled.TableChart" Match="NavLinkMatch.All">Home</MudNavLink>
+                        <MudNavLink Href="/course" Icon="@Icons.Filled.Bookmarks"Match="NavLinkMatch.All">Courses</MudNavLink>
+                        <MudNavLink Href="/test" Icon="@Icons.Filled.FilterNone"Match="NavLinkMatch.All">Tests</MudNavLink>
                         <MudNavLink Href="/counter">Counter</MudNavLink>
                         <MudNavLink Href="/fetchdata">Weather Forecast</MudNavLink>
                     </MudNavMenu>

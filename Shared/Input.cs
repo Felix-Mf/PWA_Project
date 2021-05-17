@@ -8,13 +8,6 @@ namespace PWA_Project.Shared
 {
     public class Input
     {
-        public Input()
-        {
-            Test = new HashSet<Test>();
-            Question = new HashSet<Question>();
-            Answer = new HashSet<Answer>();
-        }
-
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
@@ -28,8 +21,10 @@ namespace PWA_Project.Shared
         [Required]
         public int AnswerId { get; set; }
 
-        public virtual ICollection<Test> Test { get; set; }
-        public virtual ICollection<Question> Question { get; set; }
-        public virtual ICollection<Answer> Answer { get; set; }
+        public virtual Test Test { get; set; }
+
+        public virtual Question Question { get; set; }
+
+        public virtual Answer Answer { get; set; }
     }
 }

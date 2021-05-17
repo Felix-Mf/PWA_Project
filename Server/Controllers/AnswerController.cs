@@ -41,11 +41,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(Answer Answer)
+        public async Task<IActionResult> Insert(Answer answer)
         {
             try
             {
-                await db.Answer.AddAsync(Answer);
+                await db.Answer.AddAsync(answer);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -58,11 +58,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(Answer Answer)
+        public async Task<IActionResult> Update(Answer answer)
         {
             try
             {
-                db.Answer.Update(Answer);
+                db.Answer.Update(answer);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -74,12 +74,14 @@ namespace PWA_Project.Server.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(Answer Answer)
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                db.Answer.Remove(Answer);
+                List<Answer> answerList = GetById(id).ToList();
+                Answer answer = answerList.First();
+                db.Answer.Remove(answer);
                 await db.SaveChangesAsync();
 
                 return Ok();

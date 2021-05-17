@@ -35,11 +35,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(Input Input)
+        public async Task<IActionResult> Insert(Input input)
         {
             try
             {
-                await db.Input.AddAsync(Input);
+                await db.Input.AddAsync(input);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -52,11 +52,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(Input Input)
+        public async Task<IActionResult> Update(Input input)
         {
             try
             {
-                db.Input.Update(Input);
+                db.Input.Update(input);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -68,12 +68,14 @@ namespace PWA_Project.Server.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(Input Input)
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                db.Input.Remove(Input);
+                List<Input> inputList = GetById(id).ToList();
+                Input input = inputList.First();
+                db.Input.Remove(input);
                 await db.SaveChangesAsync();
 
                 return Ok();

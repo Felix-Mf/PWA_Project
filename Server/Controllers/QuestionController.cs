@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PWA_Project.Server.Data;
 using PWA_Project.Shared;
@@ -41,11 +42,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(Question Question)
+        public async Task<IActionResult> Insert(Question question)
         {
             try
             {
-                await db.Question.AddAsync(Question);
+                await db.Question.AddAsync(question);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -58,11 +59,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(Question Question)
+        public async Task<IActionResult> Update(Question question)
         {
             try
             {
-                db.Question.Update(Question);
+                db.Question.Update(question);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -74,12 +75,14 @@ namespace PWA_Project.Server.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(Question Question)
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                db.Question.Remove(Question);
+                List<Question> questionList = GetById(id).ToList();
+                Question question = questionList.First();
+                db.Question.Remove(question);
                 await db.SaveChangesAsync();
 
                 return Ok();

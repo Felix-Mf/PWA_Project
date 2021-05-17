@@ -8,43 +8,45 @@ namespace PWA_Project.Server
     public class SeedData
     {
         const int NumCourses = 5;
+        const int NumTests = 5;
         static Random Random = new Random();
 
         public static void Initialize(ApplicationDbContext db)
         {
             db.Course.RemoveRange(db.Course);
-            db.Course.AddRange(CreateSeedData("Course"));
+            db.Course.AddRange(CreateCourseData());
             db.SaveChanges();
         }
 
-        private static IEnumerable<Course> CreateSeedData(string entity)
+        private static IEnumerable<Course> CreateCourseData()
         {
-            if(entity == "Course")
-            {
-                var titles = new[] { "Firma 1", "Firma 2", "Firma 3", "Firma 4", "Firma 5", "Firma 6", "Firma 7", "Firma 8", "Firma 9", "Firma 10" };
-                var descriptions = new[] { "Arbeitsschutz", "COVID-19", "IT", "Programmierung", "Vertrieb", "Forschung", "Marketing", "Beratung", "Verkauf", "Außendienst" };
+            var titles = new[] { "Firma 1", "Firma 2", "Firma 3", "Firma 4", "Firma 5", "Firma 6", "Firma 7", "Firma 8", "Firma 9", "Firma 10" };
+            var descriptions = new[] { "Arbeitsschutz", "COVID-19", "IT", "Programmierung", "Vertrieb", "Forschung", "Marketing", "Beratung", "Verkauf", "Außendienst" };
 
-                for (var i = 0; i < NumCourses; i++)
+            for (var i = 0; i < NumCourses; i++)
+            {
+                yield return new Course
                 {
-                    yield return new Course
-                    {
-                        Titel = PickRandom(titles),
-                        Description = PickRandom(descriptions)
-                    };
-                }
-
+                    Titel = PickRandom(titles),
+                    Description = PickRandom(descriptions)
+                };
             }
-            else if(entity == "Test")
-            {
+        }
 
-            }
-            else if(entity == "Question")
-            {
+        private static IEnumerable<Test> CreateTestData()
+        {
+            var titles = new[] { "Test A", "Test B", "Test C", "Test D", "Test E", "Test F", "Test G", "Test H", "Test I", "Test J" };
+            var descriptions = new[] { "Arbeitsschutz", "COVID-19", "IT", "Programmierung", "Vertrieb", "Forschung", "Marketing", "Beratung", "Verkauf", "Außendienst" };
 
-            }
-            else if(entity == "Answer")
+            for (var i = 0; i < NumTests; i++)
             {
-
+                yield return new Test
+                {
+                    Titel = PickRandom(titles),
+                    Description = PickRandom(descriptions),
+                    Date_min = DateTime.Now,
+                    Date_max = DateTime.Now.AddMonths(3)
+                };
             }
         }
 

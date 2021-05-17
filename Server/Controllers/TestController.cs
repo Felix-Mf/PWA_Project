@@ -25,7 +25,7 @@ namespace PWA_Project.Server.Controllers
         [HttpGet]
         public IEnumerable<Test> GetAll()
         {
-            return db.Test;
+            return db.Test.OrderBy(x => x.Titel);
         }
 
         [HttpGet]
@@ -41,11 +41,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(Test Test)
+        public async Task<IActionResult> Insert(Test test)
         {
             try
             {
-                await db.Test.AddAsync(Test);
+                await db.Test.AddAsync(test);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -58,11 +58,11 @@ namespace PWA_Project.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(Test Test)
+        public async Task<IActionResult> Update(Test test)
         {
             try
             {
-                db.Test.Update(Test);
+                db.Test.Update(test);
                 await db.SaveChangesAsync();
 
                 return Ok();
@@ -74,12 +74,14 @@ namespace PWA_Project.Server.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(Test Test)
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                db.Test.Remove(Test);
+                List<Test> testList = GetById(id).ToList();
+                Test test = testList.First();
+                db.Test.Remove(test);
                 await db.SaveChangesAsync();
 
                 return Ok();

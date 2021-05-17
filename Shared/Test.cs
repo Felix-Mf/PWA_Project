@@ -23,10 +23,15 @@ namespace PWA_Project.Shared
         public string Description { get; set; }
 
         [Required]
-        public DateTime Date_min { get; set; }
+        public DateTime? Date_min { get; set; }
 
         [Required]
-        public DateTime Date_max { get; set; }
+        public DateTime? Date_max { get; set; }
+
+        [Required]
+        public int CourseId { get; set; }
+
+        public virtual Course Course { get; set; }
 
         public virtual ICollection<Question> Question { get; set; }
     }
