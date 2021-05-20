@@ -22,6 +22,6 @@ namespace PWA_Project.Shared
 
         public string Description { get; set; }
 
-        public ICollection<Test> Test { get; set; }
+        public ICollection<Test>? Test { get; set; }
     }
 }

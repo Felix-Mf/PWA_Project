@@ -26,19 +26,19 @@ namespace PWA_Project.Server.Controllers
         [HttpGet]
         public IEnumerable<Question> GetAll()
         {
-            return db.Question;
+            return db.Question.Include(x => x.Answer);
         }
 
         [HttpGet]
         public IEnumerable<Question> GetById([FromQuery] int id)
         {
-            return db.Question.Where(x => x.Id == id);
+            return db.Question.Where(x => x.Id == id).Include(x => x.Answer);
         }
 
         [HttpGet]
         public IEnumerable<Question> GetByText([FromQuery] string text)
         {
-            return db.Question.Where(x => x.Text.Contains(text));
+            return db.Question.Where(x => x.Text.Contains(text)).Include(x => x.Answer);
         }
 
         [HttpPost]

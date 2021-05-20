@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PWA_Project.Server.Data;
 using PWA_Project.Shared;
@@ -25,19 +26,19 @@ namespace PWA_Project.Server.Controllers
         [HttpGet]
         public IEnumerable<Test> GetAll()
         {
-            return db.Test.OrderBy(x => x.Titel);
+            return db.Test.Include(x => x.Question).OrderBy(x => x.Titel);
         }
 
         [HttpGet]
         public IEnumerable<Test> GetById([FromQuery] int id)
         {
-            return db.Test.Where(x => x.Id == id);
+            return db.Test.Where(x => x.Id == id).Include(x => x.Question);
         }
 
         [HttpGet]
         public IEnumerable<Test> GetByName([FromQuery] string titel)
         {
-            return db.Test.Where(x => x.Titel.Contains(titel));
+            return db.Test.Where(x => x.Titel.Contains(titel)).Include(x => x.Question);
         }
 
         [HttpPost]
