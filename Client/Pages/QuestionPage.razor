@@ -1,0 +1,171 @@
+@page "/question"
+
+@using PWA_Project.Shared
+@using System.Net.Http
+@inject HttpClient Http
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@if (Questions != null)
+{
+    <MudItem xs="12" md="12" sm="12">
+        <MudSelect T="int" Label="Question Filter" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true" ValueChanged="OnSelectedValue">
+            <MudSelectItem Value="@(0)">All Questions</MudSelectItem>
+
+            @foreach (Question c in Questions)
+            {
+                <MudSelectItem Value="@(c.Id)">@c.Text</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <br />
+    <MudTable OnRowClick="@OnRowClick" T="Question" Items="@Questions" Hover="true" Filter="new Func<Question, bool>(FilterFunc)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Questions</MudText>
+            <MudToolBarSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Text">@context.Text</MudTd>
+            <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteQuestion(context))"></MudIconButton></MudTd>
+        </RowTemplate>
+    </MudTable>
+    <br />
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddQuestion" />
+}
+else if (notFound)
+{
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddQuestion" />
+}
+else
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
+}
+
+<br />
+<span style="color:red;">@ErrorMessage</span>
+
+@code
+{
+    private List<Test> Tests;
+    private List<Question> Questions;
+    private Test cTest;
+    private Question cQuestion;
+    private string SearchName = "";
+    private string ErrorMessage = "";
+    private string searchString = "";
+    private bool notFound;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetTests();
+        await OnSelectedValue(0);
+    }
+
+    private async Task GetTests()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Test[]>("api/Test/GetAll");
+
+            if (result != null)
+            {
+                Tests = result.ToList<Test>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task GetQuestions()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Question[]>("api/Question/GetAll");
+
+            if (result != null)
+            {
+                Questions = result.ToList<Question>();
+            }
+
+            notFound = (Questions == null);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task AddQuestion()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Question", null);
+        parameters.Add("action", "Add");
+
+        var dialog = DialogService.Show<QuestionPopup>("Add Question", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await GetQuestions();
+        }
+    }
+
+    private async Task DeleteQuestion(Question tQuestion)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Question", tQuestion);
+        parameters.Add("action", "Delete");
+
+        var dialog = DialogService.Show<QuestionPopup>("Delete Question", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await GetQuestions();
+        }
+    }
+
+    private async Task OnRowClick(TableRowClickEventArgs<Question> tQuestion)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("Question", tQuestion.Item);
+        parameters.Add("action", "Update");
+
+        var dialog = DialogService.Show<QuestionPopup>("Update Question", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await GetQuestions();
+        }
+    }
+
+    private async Task OnSelectedValue(int tTest)
+    {
+        if (tTest == 0)
+        {
+            await GetQuestions();
+        }
+        else
+        {
+            await GetQuestions();
+            Questions = Questions.Where(x => x.TestId == tTest).ToList();
+        }
+    }
+
+    private bool FilterFunc(Question element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Text.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Id}".Contains(searchString))
+            return true;
+        return false;
+    }
+}
