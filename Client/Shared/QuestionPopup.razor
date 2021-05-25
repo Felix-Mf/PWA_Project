@@ -29,7 +29,7 @@
                                 <div class="col-12 text-left page-header-title">
                                     <i class="bi-camera bg-blue"></i>
                                     <MudItem xs="12" sm="12" md="12">
-                                        <MudTextField @bind-Value="@question.Text" Label="Titel" Variant="Variant.Text" Margin="Margin.None" Disabled="@disabled"></MudTextField>
+                                        <MudTextField @bind-Value="@question.Text" Label="Text" Variant="Variant.Text" Margin="Margin.None" Disabled="@disabled"></MudTextField>
                                     </MudItem>
                                 </div>
                             </div>
@@ -37,10 +37,10 @@
                                 <div class="col-12 text-left page-header-title">
                                     <i class="bi-camera bg-blue"></i>
                                     <MudItem xs="12" md="12" sm="12">
-                                        <MudSelect T="int" @bind-Value="@question.TestId" Label="Test" Margin="Margin.Normal" Disabled="@disabled"  Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true">
-                                            @foreach (Test c in Tests)
+                                        <MudSelect T="int" @bind-Value="@question.TestId" Label="Test" Margin="Margin.Normal" Disabled="@disabled" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true">
+                                            @foreach (Test t in Tests)
                                             {
-                                                <MudSelectItem Value="@(c.Id)">@c.Titel</MudSelectItem>
+                                                <MudSelectItem Value="@(t.Id)">@t.Titel</MudSelectItem>
                                             }
                                         </MudSelect>
                                     </MudItem>
@@ -51,7 +51,7 @@
                             <div class="row pb-4  ">
                                 <div class="col-8 text-left page-header-title">
                                     <i class="bi-patch-question bg-blue"></i>
-                                    <h5 class="p-0 m-0">question Information</h5>
+                                    <h5 class="p-0 m-0">Question Information</h5>
                                 </div>
                             </div>
                             <div class="row pb-4 ">
@@ -60,9 +60,36 @@
                                         <div class="card-header " id="headingOne">
                                             <h5 class="mb-0">
                                                 <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                    Questions
+                                                    Answers
                                                 </button>
                                             </h5>
+                                        </div>
+                                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                                            <div class="card-body c-border-left-blue p-4">
+                                                @if (question.Answer.Count() > 0)
+                                                {
+                                                    <MudTable T="Answer" Items="@question.Answer" Hover="true">
+                                                        <ToolBarContent>
+                                                            <MudText Typo="Typo.h6">Questions</MudText>
+                                                            <MudToolBarSpacer />
+                                                        </ToolBarContent>
+                                                        <HeaderContent>
+                                                            <MudTh>Id</MudTh>
+                                                            <MudTh>Text</MudTh>
+                                                            <MudTh>Correct</MudTh>
+                                                        </HeaderContent>
+                                                        <RowTemplate>
+                                                            <MudTd DataLabel="Id">@context.Id</MudTd>
+                                                            <MudTd DataLabel="Text">@context.Text</MudTd>
+                                                            <MudTd DataLabel="Correct">@context.Correct</MudTd>
+                                                        </RowTemplate>
+                                                    </MudTable>
+                                                }
+                                                else
+                                                {
+                                                    <p>No Answers</p>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -92,6 +119,14 @@
                 </MudItem>
                 <MudItem xs="12" sm="12" md="12">
                     <MudTextField @bind-Value="@question.Text" Label="Text" Variant="Variant.Text" Margin="Margin.Normal" Disabled="@disabled"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="12" sm="12">
+                    <MudSelect T="int" @bind-Value="@question.TestId" Label="Test" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true">
+                        @foreach (Test t in Tests)
+                        {
+                            <MudSelectItem Value="@(t.Id)">@t.Titel</MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudItem>
             </DialogContent>
             <DialogActions>
@@ -133,19 +168,19 @@
             };
 
             popupIcon = Icons.Material.Filled.Add;
-            popupTitel = "Add question?";
+            popupTitel = "Add Question?";
             disabled = false;
         }
         else if (action == "Delete")
         {
             popupIcon = Icons.Material.Filled.DeleteForever;
-            popupTitel = "Delete question?";
+            popupTitel = "Delete Question?";
             disabled = true;
         }
         else if (action == "Update")
         {
             popupIcon = Icons.Material.Filled.Update;
-            popupTitel = "Update question?";
+            popupTitel = "Update Question?";
             disabled = false;
         }
     }

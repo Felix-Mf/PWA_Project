@@ -9,12 +9,12 @@
 @if (Questions != null)
 {
     <MudItem xs="12" md="12" sm="12">
-        <MudSelect T="int" Label="Question Filter" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true" ValueChanged="OnSelectedValue">
-            <MudSelectItem Value="@(0)">All Questions</MudSelectItem>
+        <MudSelect T="int" Label="Test Filter" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true" ValueChanged="OnSelectedValue">
+            <MudSelectItem Value="@(0)">All Tests</MudSelectItem>
 
-            @foreach (Question c in Questions)
+            @foreach (Test t in Tests)
             {
-                <MudSelectItem Value="@(c.Id)">@c.Text</MudSelectItem>
+                <MudSelectItem Value="@(t.Id)">@t.Titel</MudSelectItem>
             }
         </MudSelect>
     </MudItem>
@@ -25,10 +25,16 @@
             <MudToolBarSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
-
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Text</MudTh>
+            <MudTh>Image</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Text">@context.Text</MudTd>
+            <MudTd DataLabel="ImagePath">@context.ImagePath</MudTd>
             <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteQuestion(context))"></MudIconButton></MudTd>
         </RowTemplate>
     </MudTable>
@@ -49,6 +55,7 @@ else
 
 @code
 {
+    private List<Course> Courses;
     private List<Test> Tests;
     private List<Question> Questions;
     private Test cTest;
@@ -60,8 +67,26 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await GetCourses();
         await GetTests();
         await OnSelectedValue(0);
+    }
+
+    private async Task GetCourses()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Course[]>("api/Course/GetAll");
+
+            if (result != null)
+            {
+                Courses = result.ToList<Course>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
     }
 
     private async Task GetTests()
@@ -103,7 +128,7 @@ else
     private async Task AddQuestion()
     {
         var parameters = new DialogParameters();
-        parameters.Add("Question", null);
+        parameters.Add("question", null);
         parameters.Add("action", "Add");
 
         var dialog = DialogService.Show<QuestionPopup>("Add Question", parameters);
@@ -118,7 +143,7 @@ else
     private async Task DeleteQuestion(Question tQuestion)
     {
         var parameters = new DialogParameters();
-        parameters.Add("Question", tQuestion);
+        parameters.Add("question", tQuestion);
         parameters.Add("action", "Delete");
 
         var dialog = DialogService.Show<QuestionPopup>("Delete Question", parameters);
@@ -133,7 +158,7 @@ else
     private async Task OnRowClick(TableRowClickEventArgs<Question> tQuestion)
     {
         var parameters = new DialogParameters();
-        parameters.Add("Question", tQuestion.Item);
+        parameters.Add("question", tQuestion.Item);
         parameters.Add("action", "Update");
 
         var dialog = DialogService.Show<QuestionPopup>("Update Question", parameters);
