@@ -46,6 +46,17 @@ namespace PWA_Project.Server
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "MyAllowSpecificOrigins",
+                                  builder =>
+                                  {
+                                      builder.AllowAnyOrigin();
+                                      builder.AllowAnyHeader();
+                                      builder.AllowAnyMethod();
+                                  });
+            });
+
             services.AddRazorPages();
         }
 
@@ -70,6 +81,8 @@ namespace PWA_Project.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors("MyAllowSpecificOrigins");
 
             app.UseIdentityServer();
             app.UseAuthentication();

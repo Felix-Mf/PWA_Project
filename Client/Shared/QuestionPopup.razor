@@ -120,6 +120,38 @@
                 <MudItem xs="12" sm="12" md="12">
                     <MudTextField @bind-Value="@question.Text" Label="Text" Variant="Variant.Text" Margin="Margin.Normal" Disabled="@disabled"></MudTextField>
                 </MudItem>
+                <br />
+                <MudItem xs="12" sm="12" md="12">
+                    <MudText Typo="@Typo.caption">Image</MudText>
+                    <br />
+                    <InputFile id="fileInput" OnChange="UploadFiles" hidden accept=".jpg, .jpeg, .png" />
+                    <MudButton HtmlTag="label" Disabled="@uploadDisabled"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Filled.CloudUpload"
+                               for="fileInput">
+                        Upload image
+                    </MudButton>
+                    <br />
+                    @if (files != null)
+                    {
+                        <MudText Typo="@Typo.body2">@fileData.Count() File@(fileData.Count() == 1 ? "" : "s"):</MudText>
+                        <MudList>
+                            @foreach (var file in fileData)
+                            {
+                                <MudListItem Icon="@Icons.Filled.AttachFile" @key="@file">
+                                    <MudText Typo="@Typo.body2">
+                                        @file.Name <code>@file.Size bytes</code>
+                                    </MudText>
+                                </MudListItem>
+                                <br />
+                                <div class="col-12 text-center">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteImage())"></MudIconButton>
+                                </div>
+                            }
+                        </MudList>
+                    }
+                </MudItem>
                 <MudItem xs="12" md="12" sm="12">
                     <MudSelect T="int" @bind-Value="@question.TestId" Label="Test" Variant="Variant.Text" Direction="Direction.Bottom" Dense="true" OffsetY="true">
                         @foreach (Test t in Tests)
@@ -153,6 +185,12 @@
 
     private List<Test> Tests;
 
+    private IList<IBrowserFile> files = new List<IBrowserFile>();
+    private List<FileData> fileData = new List<FileData>();
+    private string imgUrl = string.Empty;
+    private long maxFileSize = 2000000;
+    private bool uploadDisabled = true;
+
     protected override async Task OnInitializedAsync()
     {
         await GetTests();
@@ -183,6 +221,15 @@
             popupTitel = "Update Question?";
             disabled = false;
         }
+
+        if (files.Count() > 0)
+        {
+            uploadDisabled = true;
+        }
+        else
+        {
+            uploadDisabled = false;
+        }
     }
 
     private void Cancel()
@@ -210,10 +257,11 @@
     {
         try
         {
-            var result = await Http.PostAsJsonAsync("api/question/Insert/", question);
+            var result = await Http.PostAsJsonAsync("api/Question/Insert/", question);
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
+                await SaveToServer();
                 Snackbar.Add("Added", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(question.Id));
             }
@@ -233,7 +281,7 @@
     {
         try
         {
-            var result = await Http.DeleteAsync("api/question/Delete/" + Convert.ToInt32(question.Id));
+            var result = await Http.DeleteAsync("api/Question/Delete/" + Convert.ToInt32(question.Id));
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -256,7 +304,7 @@
     {
         try
         {
-            var result = await Http.PutAsJsonAsync("api/question/Update/", question);
+            var result = await Http.PutAsJsonAsync("api/Question/Update/", question);
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -290,5 +338,55 @@
         {
             throw ex;
         }
+    }
+
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        if (e.File.Size > maxFileSize)
+        {
+            Snackbar.Add("File Size is too large, max. 2MB", Severity.Error);
+            return;
+        }
+
+        uploadDisabled = true;
+
+        IBrowserFile imgFile = e.File;
+        string fileName = imgFile.Name;
+        var buffers = new byte[imgFile.Size];
+        await imgFile.OpenReadStream(maxFileSize).ReadAsync(buffers);
+        string imageType = imgFile.ContentType;
+        imgUrl = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
+
+        fileData.Add(new FileData
+        {
+            Name = fileName,
+            Data = buffers,
+            FileType = imageType,
+            Size = imgFile.Size
+        });
+    }
+
+    private async Task SaveToServer()
+    {
+        if (fileData.Count > 0)
+        {
+            var payload = new SaveFile { Files = fileData };
+            var result = await Http.PostAsJsonAsync("/api/Fileupload/SaveToPhysicalLocation", payload);
+
+            if (result.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                Snackbar.Add("Image Upload successful", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Image Upload failed", Severity.Error);
+            }
+        }
+    }
+
+    private void DeleteImage()
+    {
+        fileData.Clear();
+        uploadDisabled = false;
     }
 }

@@ -34,7 +34,16 @@
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Text">@context.Text</MudTd>
-            <MudTd DataLabel="ImagePath">@context.ImagePath</MudTd>
+            <MudTd DataLabel="ImagePath">
+                @if (@context.ImagePath != null && @context.ImagePath != "")
+                {
+                    <img src="@context.ImagePath">
+                }
+                else
+                {
+                    <span>No Image</span>
+                }
+            </MudTd>
             <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteQuestion(context))"></MudIconButton></MudTd>
         </RowTemplate>
     </MudTable>
