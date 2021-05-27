@@ -14,6 +14,7 @@ namespace PWA_Project.Shared
     public class FileData
     {
         public string Name { get; set; }
+        public string Guid { get; set; }
         public byte[] Data { get; set; }
         public string FileType { get; set; }
         public long Size { get; set; }

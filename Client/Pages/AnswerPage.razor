@@ -1,0 +1,139 @@
+﻿@page "/answer/{QuestionId:int}"
+
+@using PWA_Project.Shared
+@using System.Net.Http
+@inject HttpClient Http
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@if (Answers != null)
+{
+    <MudTable OnRowClick="@OnRowClick" T="Answer" Items="@Answers" Hover="true" Filter="new Func<Answer, bool>(FilterFunc)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Answers</MudText>
+            <MudToolBarSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Text</MudTh>
+            <MudTh>Correct</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Text">@context.Text</MudTd>
+            <MudTd DataLabel="Correct">
+                <MudSwitch @bind-Checked="@context.Correct" Color="Color.Primary" Disabled="true" />
+            </MudTd>
+            <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteAnswer(context))"></MudIconButton></MudTd>
+        </RowTemplate>
+    </MudTable>
+    <br />
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddAnswer" />
+}
+else if (notFound)
+{
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddAnswer" />
+}
+else
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
+}
+
+<br />
+<span style="color:red;">@ErrorMessage</span>
+
+@code
+{
+    [Parameter]
+    public int QuestionId { get; set; }
+
+    private List<Answer> Answers;
+    private Answer cAnswer;
+    private string SearchName = "";
+    private string ErrorMessage = "";
+    private string searchString = "";
+    private bool notFound;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAnswers();
+    }
+
+    private async Task GetAnswers()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Answer[]>($"api/Answer/GetAll/{QuestionId}");
+
+            if (result != null)
+            {
+                Answers = result.ToList<Answer>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task AddAnswer()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("answer", null);
+        parameters.Add("action", "Add");
+        parameters.Add("question", QuestionId);
+
+        var dialog = DialogService.Show<AnswerPopup>("Add Answer", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await GetAnswers();
+        }
+    }
+
+    private async Task DeleteAnswer(Answer tAnswer)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("answer", tAnswer);
+        parameters.Add("action", "Delete");
+        parameters.Add("question", QuestionId);
+
+        var dialog = DialogService.Show<AnswerPopup>("Delete Answer", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await GetAnswers();
+        }
+    }
+
+    private async Task OnRowClick(TableRowClickEventArgs<Answer> tAnswer)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("answer", tAnswer.Item);
+        parameters.Add("action", "Update");
+        parameters.Add("question", QuestionId);
+
+        var dialog = DialogService.Show<AnswerPopup>("Update Answer", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await GetAnswers();
+        }
+    }
+
+    private bool FilterFunc(Answer element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Text.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Id}".Contains(searchString))
+            return true;
+        return false;
+    }
+}

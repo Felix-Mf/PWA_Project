@@ -3,6 +3,7 @@
 @using PWA_Project.Shared
 @using System.Net.Http
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -30,18 +31,46 @@
             <MudTh>Text</MudTh>
             <MudTh>Image</MudTh>
             <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Text">@context.Text</MudTd>
-            <MudTd DataLabel="ImagePath">
-                @if (@context.ImagePath != null && @context.ImagePath != "")
+            <MudTd DataLabel="Image">
+                @if (context.ImagePath != null && context.ImagePath != "")
                 {
-                    <img src="@context.ImagePath">
+                    <img src="@(NavigationManager.BaseUri)Uploads/@context.ImagePath" alt="Image not found" style="max-width: 5rem;">
                 }
                 else
                 {
                     <span>No Image</span>
+                }
+            </MudTd>
+            <MudTd DataLabel="Answers">
+                @if (context.Answer.Count() == 0)
+                {
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.QuestionAnswer" Color="Color.Error" OnClick="@(() => OpenAnswerPage(context))">Answers</MudButton>
+                }
+                else
+                {
+                    bool complete = false;
+
+                    foreach (Answer a in context.Answer)
+                    {
+                        if (a.Correct == true)
+                        {
+                            complete = true;
+                        }
+                    }
+
+                    if (complete == true && context.Answer.Count() > 1)
+                    {
+                        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.QuestionAnswer" Color="Color.Success" OnClick="@(() => OpenAnswerPage(context))">Answers</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.QuestionAnswer" Color="Color.Warning" OnClick="@(() => OpenAnswerPage(context))">Answers</MudButton>
+                    }
                 }
             </MudTd>
             <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteQuestion(context))"></MudIconButton></MudTd>
@@ -79,6 +108,7 @@ else
         await GetCourses();
         await GetTests();
         await OnSelectedValue(0);
+        Snackbar.Add(Environment.SystemDirectory, Severity.Error);
     }
 
     private async Task GetCourses()
@@ -162,6 +192,11 @@ else
         {
             await GetQuestions();
         }
+    }
+
+    private void OpenAnswerPage(Question tQuestion)
+    {
+        NavigationManager.NavigateTo("answer/" + tQuestion.Id);
     }
 
     private async Task OnRowClick(TableRowClickEventArgs<Question> tQuestion)

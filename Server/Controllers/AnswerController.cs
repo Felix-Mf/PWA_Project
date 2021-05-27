@@ -22,10 +22,10 @@ namespace PWA_Project.Server.Controllers
             this.db = db;
         }
 
-        [HttpGet]
-        public IEnumerable<Answer> GetAll()
+        [HttpGet("{Id}")]
+        public IEnumerable<Answer> GetAll(int id)
         {
-            return db.Answer;
+            return db.Answer.Where(x => x.QuestionId == id);
         }
 
         [HttpGet]

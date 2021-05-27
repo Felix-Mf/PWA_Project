@@ -23,7 +23,7 @@ namespace PWA_Project.Server.Controllers
                 foreach (var file in saveFile.Files)
                 {
                     string fileExtenstion = file.FileType.ToLower().Contains("png") ? ".png" : ".jpg";
-                    string fileName = Path.Combine(Environment.CurrentDirectory, "Uploads", Guid.NewGuid().ToString() + fileExtenstion);
+                    string fileName = Path.Combine(Environment.CurrentDirectory, "Uploads", file.Guid + fileExtenstion);
                     using (var fileStream = System.IO.File.Create(fileName))
                     {
                         await fileStream.WriteAsync(file.Data);

@@ -70,7 +70,7 @@
                                                 {
                                                     <MudTable T="Answer" Items="@question.Answer" Hover="true">
                                                         <ToolBarContent>
-                                                            <MudText Typo="Typo.h6">Questions</MudText>
+                                                            <MudText Typo="Typo.h6">Answers</MudText>
                                                             <MudToolBarSpacer />
                                                         </ToolBarContent>
                                                         <HeaderContent>
@@ -201,8 +201,7 @@
             {
                 Id = 0,
                 Text = "",
-                ImagePath = "",
-                VideoPath = "",
+                ImagePath = ""
             };
 
             popupIcon = Icons.Material.Filled.Add;
@@ -257,11 +256,16 @@
     {
         try
         {
+            if (question.TestId == 0)
+            {
+                return;
+            }
+
+            question.ImagePath = await SaveToServer();
             var result = await Http.PostAsJsonAsync("api/Question/Insert/", question);
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                await SaveToServer();
                 Snackbar.Add("Added", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(question.Id));
             }
@@ -360,14 +364,18 @@
         fileData.Add(new FileData
         {
             Name = fileName,
+            Guid = Guid.NewGuid().ToString(),
             Data = buffers,
             FileType = imageType,
             Size = imgFile.Size
         });
     }
 
-    private async Task SaveToServer()
+    private async Task<string> SaveToServer()
     {
+        string path = "";
+        string extension = "";
+
         if (fileData.Count > 0)
         {
             var payload = new SaveFile { Files = fileData };
@@ -376,12 +384,27 @@
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 Snackbar.Add("Image Upload successful", Severity.Success);
+                foreach (var file in fileData)
+                {
+                    if (file.FileType == "image/png")
+                    {
+                        extension = ".png";
+                    }
+                    else
+                    {
+                        extension = ".jpg";
+                    }
+
+                    path = file.Guid + extension;
+                }
             }
             else
             {
                 Snackbar.Add("Image Upload failed", Severity.Error);
             }
         }
+
+        return path;
     }
 
     private void DeleteImage()
