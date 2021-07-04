@@ -12,76 +12,78 @@
             </MudText>
         </TitleContent>
         <DialogContent>
-            <div class="content-block popup-content-block" style=" ">
-                <div class="row ml-0 mr-0 " style="min-height: 100%;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 c-border-left-blue ">
-                        <div class="row pb-4  ">
-                            <div class="col-12 text-left page-header-title">
-                                <i class="bi-camera bg-blue"></i>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudTextField @bind-Value="@course.Id" Label="Id" Variant="Variant.Text" Margin="Margin.Dense" Disabled="true"></MudTextField>
-                                </MudItem>
+            <MudContainer Style="max-height: 80vh; overflow-y: scroll">
+                <div class="content-block popup-content-block">
+                    <div class="row ml-0 mr-0 " style="min-height: 100%;">
+                        <div class="col-lg-12 col-md-12 col-sm-12 c-border-left-blue ">
+                            <div class="row pb-4">
+                                <div class="col-12 text-left page-header-title">
+                                    <i class="bi-camera bg-blue"></i>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudTextField @bind-Value="@course.Id" Label="Id" Variant="Variant.Text" Margin="Margin.Dense" Disabled="true"></MudTextField>
+                                    </MudItem>
+                                </div>
+                            </div>
+                            <div class="row pb-4">
+                                <div class="col-12 text-left page-header-title">
+                                    <i class="bi-camera bg-blue"></i>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudTextField @bind-Value="@course.Titel" Label="Titel" Variant="Variant.Text" Margin="Margin.None" Disabled="@disabled"></MudTextField>
+                                    </MudItem>
+                                </div>
+                            </div>
+                            <div class="row pb-4">
+                                <div class="col-12 text-left page-header-title">
+                                    <i class="bi-camera bg-blue"></i>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudTextField @bind-Value="@course.Description" Label="Description" Variant="Variant.Text" Margin="Margin.Normal" Disabled="@disabled"></MudTextField>
+                                    </MudItem>
+                                </div>
                             </div>
                         </div>
-                        <div class="row pb-4  ">
-                            <div class="col-12 text-left page-header-title">
-                                <i class="bi-camera bg-blue"></i>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudTextField @bind-Value="@course.Titel" Label="Titel" Variant="Variant.Text" Margin="Margin.None" Disabled="@disabled"></MudTextField>
-                                </MudItem>
+                        <div class="col-lg-12 col-md-12 col-sm-12" style="padding-right: 24px; padding-left: 17px;">
+                            <div class="row pb-4">
+                                <div class="col-8 text-left page-header-title">
+                                    <i class="bi-patch-question bg-blue"></i>
+                                    <h5 class="p-0 m-0">Course Information</h5>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row pb-4  ">
-                            <div class="col-12 text-left page-header-title">
-                                <i class="bi-camera bg-blue"></i>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudTextField @bind-Value="@course.Description" Label="Description" Variant="Variant.Text" Margin="Margin.Normal" Disabled="@disabled"></MudTextField>
-                                </MudItem>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 col-md-12 col-sm-12" style="padding-right: 24px; padding-left: 17px;">
-                        <div class="row pb-4  ">
-                            <div class="col-8 text-left page-header-title">
-                                <i class="bi-patch-question bg-blue"></i>
-                                <h5 class="p-0 m-0">Course Information</h5>
-                            </div>
-                        </div>
-                        <div class="row pb-4 ">
-                            <div id="accordion" class="w-100 question-collapse">
-                                <div class="card c-border-left-blue">
-                                    <div class="card-header " id="headingOne">
-                                        <h5 class="mb-0">
-                                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                Tests
-                                            </button>
-                                        </h5>
-                                    </div>
-                                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-                                        <div class="card-body c-border-left-blue p-4">
-                                            @if (course.Test.Count() > 0)
-                                            {
-                                                <MudTable T="Test" Items="@course.Test" Hover="true">
-                                                    <ToolBarContent>
-                                                        <MudText Typo="Typo.h6">Tests</MudText>
-                                                        <MudToolBarSpacer />
-                                                    </ToolBarContent>
-                                                    <HeaderContent>
-                                                        <MudTh>Id</MudTh>
-                                                        <MudTh>Titel</MudTh>
-                                                        <MudTh>Description</MudTh>
-                                                    </HeaderContent>
-                                                    <RowTemplate>
-                                                        <MudTd DataLabel="Id">@context.Id</MudTd>
-                                                        <MudTd DataLabel="Titel">@context.Titel</MudTd>
-                                                        <MudTd DataLabel="Description">@context.Description</MudTd>
-                                                    </RowTemplate>
-                                                </MudTable>
-                                            }
-                                            else
-                                            {
-                                                <p>No Tests</p>
-                                            }
+                            <div class="row pb-4 ">
+                                <div id="accordion" class="w-100 question-collapse">
+                                    <div class="card c-border-left-blue">
+                                        <div class="card-header " id="headingOne">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                    Tests
+                                                </button>
+                                            </h5>
+                                        </div>
+                                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                                            <div class="card-body c-border-left-blue p-4">
+                                                @if (course.Test.Count() > 0)
+                                                {
+                                                    <MudTable T="Test" Items="@course.Test" Hover="true">
+                                                        <ToolBarContent>
+                                                            <MudText Typo="Typo.h6">Tests</MudText>
+                                                            <MudToolBarSpacer />
+                                                        </ToolBarContent>
+                                                        <HeaderContent>
+                                                            <MudTh>Id</MudTh>
+                                                            <MudTh>Titel</MudTh>
+                                                            <MudTh>Description</MudTh>
+                                                        </HeaderContent>
+                                                        <RowTemplate>
+                                                            <MudTd DataLabel="Id">@context.Id</MudTd>
+                                                            <MudTd DataLabel="Titel">@context.Titel</MudTd>
+                                                            <MudTd DataLabel="Description">@context.Description</MudTd>
+                                                        </RowTemplate>
+                                                    </MudTable>
+                                                }
+                                                else
+                                                {
+                                                    <p>No Tests</p>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -89,7 +91,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </MudContainer>
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="Cancel">Cancel</MudButton>

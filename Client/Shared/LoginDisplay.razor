@@ -1,26 +1,24 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
+@inject LocalStore LocalStore
 
 <AuthorizeView>
     <Authorized>
         <div class="noselect nav-account">
 
-            <MudMenu PositionAtCurser="false" Direction="Direction.Bottom" OffsetY="true">
+            <MudMenu PositionAtCurser="false" Direction="Direction.Bottom" OffsetY="true" OffsetX="true">
                 <ActivatorContent>
-                    <MudAvatar Size="Size.Medium" Color="Color.Primary" Class="ma-2">@context.User.Identity.Name.Substring(0, 1).ToUpper()</MudAvatar>
-                    @context.User.Identity.Name
+                    <MudAvatar Size="Size.Medium" Color="Color.Primary" Class="ma-2">@context.User.Email().Substring(0, 1).ToUpper()</MudAvatar>
+                    @context.User.Email()
                     <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" />
                 </ActivatorContent>
                 <ChildContent>
                     <MudContainer>
-                        <MudAvatar Size="Size.Medium" Color="Color.Primary" Class="ma-2">@context.User.Identity.Name.Substring(0, 1).ToUpper()</MudAvatar>
-                        @context.User.Identity.Name
+                        @context.User.Email()
                     </MudContainer>
 
-                    <MudMenuItem Link="authentication/profile" Class="text-center">Mein Account</MudMenuItem>
                     <MudMenuItem><button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button></MudMenuItem>
                 </ChildContent>
             </MudMenu>
@@ -38,6 +36,7 @@
     private async Task BeginSignOut(MouseEventArgs args)
     {
         await SignOutManager.SetSignOutState();
+        await LocalStore.SaveUserAccountAsync(null);
         Navigation.NavigateTo("authentication/logout");
     }
 }

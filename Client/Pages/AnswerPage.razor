@@ -1,8 +1,10 @@
 ﻿@page "/answer/{QuestionId:int}"
+@attribute [Authorize(Roles = "Admin")]
 
 @using PWA_Project.Shared
 @using System.Net.Http
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -36,6 +38,14 @@ else if (notFound)
 {
     <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddAnswer" />
 }
+else if (noConnection)
+{
+    <p>You need a connection to the server to access this resource.</p>
+    <br />
+    <p>If you are already connected to the server and read this, you are not authorized to access this resource.</p>
+    <br />
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.ElectricalServices" Color="Color.Warning" OnClick="@(() => GoToLogin())">Try to connect to the server</MudButton>    
+}
 else
 {
     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
@@ -55,6 +65,7 @@ else
     private string ErrorMessage = "";
     private string searchString = "";
     private bool notFound;
+    private bool noConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,25 +83,32 @@ else
                 Answers = result.ToList<Answer>();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
         }
     }
 
     private async Task AddAnswer()
     {
-        var parameters = new DialogParameters();
-        parameters.Add("answer", null);
-        parameters.Add("action", "Add");
-        parameters.Add("question", QuestionId);
-
-        var dialog = DialogService.Show<AnswerPopup>("Add Answer", parameters);
-        var result = await dialog.Result;
-
-        if (!result.Cancelled)
+        if(Answers.Count() == 3)
         {
-            await GetAnswers();
+            Snackbar.Add("There are max. 3 answers allowed per question.", Severity.Error);
+        }
+        else
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("answer", null);
+            parameters.Add("action", "Add");
+            parameters.Add("question", QuestionId);
+
+            var dialog = DialogService.Show<AnswerPopup>("Add Answer", parameters);
+            var result = await dialog.Result;
+
+            if (!result.Cancelled)
+            {
+                await GetAnswers();
+            }
         }
     }
 
@@ -135,5 +153,10 @@ else
         if ($"{element.Id}".Contains(searchString))
             return true;
         return false;
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("authentication/login");
     }
 }

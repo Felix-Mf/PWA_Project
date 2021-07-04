@@ -1,8 +1,10 @@
 ﻿@page "/course"
+@attribute [Authorize(Roles = "Admin")]
 
 @using PWA_Project.Shared
 @using System.Net.Http
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -34,6 +36,14 @@ else if (notFound)
 {
     <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddCourse" />
 }
+else if (noConnection)
+{
+    <p>You need a connection to the server to access this resource.</p>
+    <br />
+    <p>If you are already connected to the server and read this, you are not authorized to access this resource.</p>
+    <br />
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.ElectricalServices" Color="Color.Warning" OnClick="@(() => GoToLogin())">Try to connect to the server</MudButton>    
+}
 else
 {
     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
@@ -50,6 +60,7 @@ else
     private string ErrorMessage = "";
     private string searchString = "";
     private bool notFound;
+    private bool noConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,9 +80,9 @@ else
 
             notFound = (Courses == null);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
         }
     }
 
@@ -131,5 +142,10 @@ else
         if ($"{element.Id}".Contains(searchString))
             return true;
         return false;
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("authentication/login");
     }
 }

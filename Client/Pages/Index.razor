@@ -1,13 +1,13 @@
 ﻿@page "/"
+@attribute [Authorize]
 
 <MudCard Elevation="1">
     <MudCardContent>
-        <MudText>Willkommen im E-Learning Tool</MudText>
-        @*<MudText Typo="Typo.body2">Hallo</MudText>*@
+        <MudText>Welcome to E-Learning Tool</MudText>
 
         <MudCardMedia Image="images/education.png" Height="500" Class="w-100" Style="background-size: contain;" />
     </MudCardContent>
     <MudCardActions>
-        <MudButton Link="/course" Variant="Variant.Text" Color="Color.Primary">Kurse öffnen</MudButton>
+        <MudButton Link="/overview" Variant="Variant.Text" Color="Color.Primary">Go to Overview</MudButton>
     </MudCardActions>
 </MudCard>

@@ -31,7 +31,7 @@ namespace PWA_Project.Server.Controllers
                 }
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);

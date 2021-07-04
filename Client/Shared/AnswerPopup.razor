@@ -12,37 +12,39 @@
             </MudText>
         </TitleContent>
         <DialogContent>
-            <div class="content-block popup-content-block" style=" ">
-                <div class="row ml-0 mr-0 " style="min-height: 100%;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 c-border-left-blue ">
-                        <div class="row pb-4  ">
-                            <div class="col-12 text-left page-header-title">
-                                <i class="bi-camera bg-blue"></i>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudTextField @bind-Value="@answer.Id" Label="Id" Variant="Variant.Text" Margin="Margin.Dense" Disabled="true"></MudTextField>
-                                </MudItem>
+            <MudContainer Style="max-height: 80vh; overflow-y: scroll">
+                <div class="content-block popup-content-block">
+                    <div class="row ml-0 mr-0 " style="min-height: 100%;">
+                        <div class="col-lg-12 col-md-12 col-sm-12 c-border-left-blue ">
+                            <div class="row pb-4">
+                                <div class="col-12 text-left page-header-title">
+                                    <i class="bi-camera bg-blue"></i>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudTextField @bind-Value="@answer.Id" Label="Id" Variant="Variant.Text" Margin="Margin.Dense" Disabled="true"></MudTextField>
+                                    </MudItem>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row pb-4  ">
-                            <div class="col-12 text-left page-header-title">
-                                <i class="bi-camera bg-blue"></i>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudTextField @bind-Value="@answer.Text" Label="Text" Variant="Variant.Text" Margin="Margin.None" Disabled="@disabled"></MudTextField>
-                                </MudItem>
+                            <div class="row pb-4">
+                                <div class="col-12 text-left page-header-title">
+                                    <i class="bi-camera bg-blue"></i>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudTextField @bind-Value="@answer.Text" Label="Text" Variant="Variant.Text" Margin="Margin.None" Disabled="@disabled"></MudTextField>
+                                    </MudItem>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row pb-4  ">
-                            <div class="col-12 text-left page-header-title">
-                                <i class="bi-camera bg-blue"></i>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudText Typo="@Typo.caption">Correct</MudText>
-                                    <MudSwitch @bind-Checked="@answer.Correct" Color="Color.Primary" Disabled="@disabled" />
-                                </MudItem>
+                            <div class="row pb-4">
+                                <div class="col-12 text-left page-header-title">
+                                    <i class="bi-camera bg-blue"></i>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudText Typo="@Typo.caption">Correct</MudText>
+                                        <MudSwitch @bind-Checked="@answer.Correct" Color="Color.Primary" Disabled="@disabled" />
+                                    </MudItem>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </MudContainer>
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="Cancel">Cancel</MudButton>

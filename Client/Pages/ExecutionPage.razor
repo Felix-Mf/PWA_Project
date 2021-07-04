@@ -1,0 +1,284 @@
+﻿@page "/exec/{TestId:int}"
+
+@using PWA_Project.Shared
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject LocalStore LocalStore
+
+@if (Questions != null)
+{
+    <MudCarousel Style="height:100%;" AutoCycle="false" TData="object">
+        <PreviousButtonTemplate>
+            <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                <span class="mud-icon-button-label">
+                    <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipPrevious" Color="@Color.Inherit" />
+                </span>
+            </div>
+        </PreviousButtonTemplate>
+        <NextButtonTemplate>
+            <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                <span class="mud-icon-button-label">
+                    <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipNext" Color="@Color.Inherit" />
+                </span>
+            </div>
+        </NextButtonTemplate>
+        <ChildContent>
+            @foreach (Question q in Questions)
+            {
+                <MudCarouselItem Color="Color.Tertiary">
+                    <div class="d-flex" style="height:100%">
+                        <div class="content-block popup-content-block w-100 mt-5">
+                            <div class="row pb-4">
+                                <div class="col-12 text-center">
+                                    <MudText Typo="@Typo.h6" Class="mx-auto mt-5">@q.Text</MudText>
+                                </div>
+                            </div>
+                            <div class="row pb-4">
+                                <div class="col-lg-3 col-md-3 col-sm-2 col-xl-3 col-1 text-center"></div>
+                                <div class="col-lg-6 col-md-6 col-sm-8 col-xl-6 col-10 text-center">
+                                    @if (q.ImagePath != null && q.ImagePath != "")
+                                    {
+                                        <img src="/uploads/@q.ImagePath" alt="Image not found" style="max-height: 100%; max-width: 100%">
+                                    }
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-2 col-xl-3 col-1 text-center"></div>
+                            </div>
+                            <div class="row pb-4">
+                                <div class="col-12 text-center">
+                                    <i class="bi-camera bg-blue"></i>
+                                    @foreach (Answer a in q.Answer)
+                                    {
+                                        @foreach (Button b in Buttons)
+                                        {
+                                            if (b.AnswerId == a.Id && b.QuestionId == q.Id)
+                                            {
+                                                <br />
+                                                <br />
+                                                <MudButton Variant="Variant.Filled" Color="@b.btnColor" Class="input-button" Size="Size.Large" OnClick="@(() => ItemSelected(q.Id, a.Id, b))">@a.Text</MudButton>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </MudCarouselItem>
+            }
+            <MudCarouselItem Class="text-center" Color="Color.Tertiary">
+                <div class="d-flex" style="height:100%">
+                    <div class="content-block popup-content-block w-100 mt-5">
+                        <div class="row pb-4">
+                            <div class="col-lg-3 col-md-3 col-sm-2 col-xl-3 col-1 text-center"></div>
+                            <div class="col-lg-6 col-md-6 col-sm-8 col-xl-6 col-10 text-center">
+                                <img src="images/flag.png" alt="Image not found" style="max-height: 100%; max-width: 100%">
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-2 col-xl-3 col-1 text-center"></div>
+                        </div>
+                        <div class="row pb-4">
+                            <div class="col-12 text-center">
+                                <MudText Typo="@Typo.h6" Class="mx-auto mt-5">Thank you for taking your time. If you answered all questions, you can save your input now.</MudText>
+                            </div>
+                        </div>
+                        <div class="row pb-4">
+                            <div class="col-12 text-center">
+                                <i class="bi-camera bg-blue"></i>
+                                <MudButton Variant="Variant.Filled" Color="Color.Error" Class="input-button" Size="Size.Large" OnClick="SaveInput">Save Input</MudButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </MudCarouselItem>
+        </ChildContent>
+    </MudCarousel>
+}
+else if (notFound)
+{
+    <p>No data found</p>
+}
+else
+{
+    <MudProgressLinear Color="Color.Primary" Inde terminate="true" Class="my-7 top-loader" />
+}
+
+<br />
+<span style="color:red;">
+    @ErrorMessage
+</span>
+
+@code
+{
+    [Parameter]
+    public int TestId { get; set; }
+
+    private System.Security.Claims.ClaimsPrincipal user = null;
+    private string userid = "";
+
+    private List<Question> Questions;
+    private List<Answer> Answers;
+    private Dictionary<int, int> Inputs;
+    private Answer cAnswer;
+    private string SearchName = "";
+    private string ErrorMessage = "";
+    private string searchString = "";
+    private bool notFound;
+
+    MudListItem selectedItem = new MudListItem();
+    private List<Button> Buttons;
+    private Button cButton;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Inputs = new Dictionary<int, int>();
+        Buttons = new List<Button>();
+
+        await GetQuestions();
+        await GetAnswers();
+
+        Questions = Questions.Where(x => x.TestId == TestId).ToList();
+
+        foreach (Question q in Questions)
+        {
+            q.Answer = Answers.Where(x => x.QuestionId == q.Id).ToList();
+        }
+
+        foreach (Question q in Questions)
+        {
+            foreach (Answer a in Answers)
+            {
+                cButton = new Button();
+                cButton.AnswerId = a.Id;
+                cButton.QuestionId = q.Id;
+                cButton.Clicked = false;
+                Buttons.Add(cButton);
+            }
+        }
+
+        user = await LocalStore.LoadUserAccountAsync();
+        userid = $"{user.FindFirst(c => c.Type == "sub")?.Value}";
+    }
+
+    private async Task GetQuestions()
+    {
+        try
+        {
+            var result = await LocalStore.GetQuestionsAll();
+
+            if (result != null)
+            {
+                Questions = result.ToList<Question>();
+            }
+
+            notFound = (Questions == null);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task GetAnswers()
+    {
+        try
+        {
+            var result = await LocalStore.GetAnswersAll();
+
+            if (result != null)
+            {
+                Answers = result.ToList<Answer>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private void ItemSelected(int qID, int aID, Button b)
+    {
+        if (Inputs.ContainsKey(qID))
+        {
+            Inputs[qID] = aID;
+        }
+        else
+        {
+            Inputs.Add(qID, aID);
+        }
+
+        foreach (Button btn in Buttons)
+        {
+            if(btn.AnswerId != aID && btn.QuestionId == qID)
+            {
+                btn.Clicked = false;
+            }
+            else if(btn.AnswerId == aID && btn.QuestionId == qID)
+            {
+                btn.Clicked = true;
+            }
+        }
+    }
+
+    private void SaveInput()
+    {
+        if (Inputs.Count() == Questions.Count())
+        {
+            try
+            {
+                List<Input> inputList = new List<Input>();
+                Input input = new Input();
+                HttpResponseMessage result = new HttpResponseMessage();
+                int tempKey = 1;
+
+                foreach (KeyValuePair<int, int> i in Inputs)
+                {
+                    input.Id = tempKey;
+                    input.QuestionId = i.Key;
+                    input.AnswerId = i.Value;
+                    input.TestId = TestId;
+                    input.UserId = userid;
+
+                    try
+                    {
+                        var innerResult = LocalStore.SaveInputAsync(input);
+                        result.StatusCode = System.Net.HttpStatusCode.OK;
+                    }
+                    catch (Exception ex)
+                    {
+                        result.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                        break;
+                    }
+
+                    tempKey++;
+                }
+
+                if (result.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Snackbar.Add("Input saved locally.", Severity.Success);
+                    NavigationManager.NavigateTo("overview");
+                }
+                else
+                {
+                    Snackbar.Add("Input not saved. Error.", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        else
+        {
+            Snackbar.Add("Input not saved. You have to answer all questions.", Severity.Error);
+        }
+    }
+
+    public class Button
+    {
+        public int AnswerId { get; set; }
+        public int QuestionId { get; set; }
+        public bool Clicked { get; set; }
+        public Color btnColor => Clicked ? Color.Warning : Color.Primary;
+    }
+}

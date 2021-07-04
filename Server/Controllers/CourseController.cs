@@ -23,6 +23,11 @@ namespace PWA_Project.Server.Controllers
             this.db = db;
         }
 
+        public IEnumerable<Course> NewData([FromQuery] int id)
+        {
+            return db.Course.Where(v => v.Id >= id);
+        }
+
         [HttpGet]
         public IEnumerable<Course> GetAll()
         {
@@ -51,7 +56,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -68,7 +73,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -87,7 +92,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);

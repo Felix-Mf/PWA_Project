@@ -22,6 +22,11 @@ namespace PWA_Project.Server.Controllers
             this.db = db;
         }
 
+        public IEnumerable<Input> NewData([FromQuery] int id)
+        {
+            return db.Input.Where(v => v.Id >= id);
+        }
+
         [HttpGet]
         public IEnumerable<Input> GetAll()
         {
@@ -34,17 +39,33 @@ namespace PWA_Project.Server.Controllers
             return db.Input.Where(x => x.Id == id);
         }
 
+        [HttpGet("{TestId}")]
+        public IEnumerable<Input> GetByTestId(int testId)
+        {
+            return db.Input.Where(x => x.TestId == testId);
+        }
+
+        [HttpGet("{userid}")]
+        public IEnumerable<Input> GetByUserId([FromQuery] string userid)
+        {
+            return db.Input.Where(x => x.UserId == userid);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Insert(Input input)
+        public async Task<IActionResult> Insert(List<Input> inputList)
         {
             try
             {
-                await db.Input.AddAsync(input);
+                foreach(Input input in inputList)
+                {
+                    await db.Input.AddAsync(input);
+                }
+
                 await db.SaveChangesAsync();
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -61,7 +82,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -80,7 +101,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);

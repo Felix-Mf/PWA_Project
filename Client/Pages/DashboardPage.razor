@@ -1,0 +1,204 @@
+﻿@page "/dashboard/{TestId:int}"
+@attribute [Authorize(Roles = "Admin")]
+
+@using PWA_Project.Shared
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@if (Inputs != null)
+{
+    <div class="content-block popup-content-block">
+        <div class="row ml-0 mr-0 " style="min-height: 100%;">
+            <div class="col-lg-12 col-md-12 col-sm-12 c-border-left-blue ">
+                <div class="row pb-4">
+                    <div class="col-12 text-left page-header-title">
+                        <i class="bi-camera bg-blue"></i>
+                        <MudCard Elevation="1">
+                            <MudCardContent>
+                                <MudText Typo="Typo.h6">Distribution of correct and incorrect answers for each question</MudText>
+                                <MudPaper Class="pa-4">
+                                    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@XAxisLabels" Width="100%" Height="250px"></MudChart>
+                                </MudPaper>
+                            </MudCardContent>
+                        </MudCard>
+                    </div>
+                </div>
+                <div class="row pb-4">
+                    <div class="col-12 col-xl-6 col-lg-6 col-md-6 text-left page-header-title">
+                        <i class="bi-camera bg-blue"></i>
+                        <MudCard Elevation="1">
+                            <MudCardContent>
+                                <MudText Typo="Typo.h6">Percentage of correct and incorrect answers</MudText>
+                                <MudPaper Class="pa-4">
+                                    <MudChart ChartType="ChartType.Donut" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels" Width="100%" Height="250px"></MudChart>
+                                </MudPaper>
+                            </MudCardContent>
+                        </MudCard>
+                    </div>
+                    <div class="col-12 col-xl-6 col-lg-6 col-md-6 text-left page-header-title">
+                        <i class="bi-camera bg-blue"></i>
+                        <MudCard Elevation="1">
+                            <MudCardContent>
+                                <MudText Typo="Typo.h6">Percentage of correct and incorrect answers</MudText>
+                                <MudPaper Class="pa-4">
+                                    <MudChart ChartType="ChartType.Pie" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels" Width="100%" Height="250px"></MudChart>
+                                </MudPaper>
+                            </MudCardContent>
+                        </MudCard>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </div>
+}
+else if (notFound)
+{
+    <p>No data found</p>
+}
+else if (noConnection)
+{
+    <p>You need a connection to the server to access this resource.</p>
+    <br />
+    <p>If you are already connected to the server and read this, you are not authorized to access this resource.</p>
+    <br />
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.ElectricalServices" Color="Color.Warning" OnClick="@(() => GoToLogin())">Try to connect to the server</MudButton>    
+}
+else
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
+}
+
+<br />
+<span style="color:red;">@ErrorMessage</span>
+
+@code
+{
+    [Parameter]
+    public int TestId { get; set; }
+
+    private List<Input> Inputs;
+    private List<Question> Questions;
+    private List<string> QuestionsText = new List<string>();
+    private List<double> CorrectAnswers = new List<double>();
+    private List<double> NotCorrectAnswers = new List<double>();
+    private List<double> PercentageAnswers = new List<double>();
+    private double[] data;
+    private int countCorrect = 0;
+    private int countNotCorrect = 0;
+    private int countCorrectSum = 0;
+    private int countNotCorrectSum = 0;
+    private string[] labels = { "Correct", "Incorrect"};
+    private string SearchName = "";
+    private string ErrorMessage = "";
+    private string searchString = "";
+    private bool notFound;
+    private bool noConnection;
+
+    private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+
+    public List<ChartSeries> Series = new List<ChartSeries>()
+    {
+        new ChartSeries() { Name = "Correct", Data = new double[0]},
+        new ChartSeries() { Name = "Incorrect", Data = new double[0] }
+    };
+
+    public string[] XAxisLabels = new string[0];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetInputs();
+        await GetQuestions();
+
+        if(Inputs.Count() > 0)
+        {
+            PrepareData();
+        }
+    }
+
+    private async Task GetInputs()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Input[]>($"api/Input/GetByTestId/{TestId}");
+
+            if (result != null)
+            {
+                Inputs = result.ToList<Input>();
+            }
+
+            notFound = (Inputs == null);
+        }
+        catch (Exception)
+        {
+            noConnection = true;
+        }
+    }
+
+    private async Task GetQuestions()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Question[]>($"api/Question/GetByTestId/{TestId}");
+
+            if (result != null)
+            {
+                Questions = result.ToList<Question>();
+            }
+        }
+        catch (Exception)
+        {
+            noConnection = true;
+        }
+    }
+
+    private void PrepareData()
+    {
+        foreach (Question q in Questions)
+        {
+            countCorrect = 0;
+            countNotCorrect = 0;
+
+            foreach (Answer a in q.Answer)
+            {
+                foreach (Input i in Inputs)
+                {
+                    if(i.AnswerId == a.Id)
+                    {
+                        if(a.Correct == true)
+                        {
+                            countCorrect++;
+                        }
+                        else
+                        {
+                            countNotCorrect++;
+                        }
+                    }
+                }
+            }
+
+            countCorrectSum = countCorrectSum + countCorrect;
+            countNotCorrectSum = countNotCorrectSum + countNotCorrect;
+
+            QuestionsText.Add(q.Text);
+            CorrectAnswers.Add(countCorrect);
+            NotCorrectAnswers.Add(countNotCorrect);
+        }
+
+        PercentageAnswers.Add(countCorrectSum * 100 / (countCorrectSum + countNotCorrectSum));
+        PercentageAnswers.Add(countNotCorrectSum * 100 / (countCorrectSum + countNotCorrectSum));
+        data = PercentageAnswers.ToArray();
+        labels = new string[] { "Correct (" + data[0].ToString() + "%)", "Incorrect (" + data[1].ToString() + "%)" };
+
+        Series[0].Data = CorrectAnswers.ToArray();
+        Series[1].Data = NotCorrectAnswers.ToArray();
+        XAxisLabels = QuestionsText.ToArray();
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("authentication/login");
+    }
+}

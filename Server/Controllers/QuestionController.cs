@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace PWA_Project.Server.Controllers
 {
-    //[Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
     public class QuestionController : ControllerBase
@@ -21,6 +20,11 @@ namespace PWA_Project.Server.Controllers
         public QuestionController(ApplicationDbContext db)
         {
             this.db = db;
+        }
+
+        public IEnumerable<Question> NewData([FromQuery] int id)
+        {
+            return db.Question.Where(v => v.Id >= id);
         }
 
         [HttpGet]
@@ -33,6 +37,12 @@ namespace PWA_Project.Server.Controllers
         public IEnumerable<Question> GetById([FromQuery] int id)
         {
             return db.Question.Where(x => x.Id == id).Include(x => x.Answer);
+        }
+
+        [HttpGet("{TestId}")]
+        public IEnumerable<Question> GetByTestId(int testId)
+        {
+            return db.Question.Where(x => x.TestId == testId).Include(x => x.Answer).OrderBy(x => x.Id);
         }
 
         [HttpGet]
@@ -51,7 +61,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -68,7 +78,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -87,7 +97,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);

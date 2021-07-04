@@ -1,8 +1,10 @@
 ﻿@page "/test"
+@attribute [Authorize(Roles = "Admin")]
 
 @using PWA_Project.Shared
 @using System.Net.Http
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -32,6 +34,7 @@
             <MudTh>Start Date</MudTh>
             <MudTh>End Date</MudTh>
             <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
@@ -39,6 +42,73 @@
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Start Date">@context.Date_min.Value.ToString("dd/MM/yyyy")</MudTd>
             <MudTd DataLabel="End Date">@context.Date_max.Value.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="Execution">
+                @if (context.Question.Count() == 0)
+                {
+                    disabled = false;
+                    startMessage = "red";
+                }
+                else
+                {
+                    if (Inputs.Find(item => item.TestId == context.Id && item.UserId == userid) != null)
+                    {
+                        disabled = true;
+                        startMessage = "";
+                    }
+                    else
+                    {
+                        foreach (Question q in context.Question)
+                        {
+
+                            if (q.Answer.Count() == 0)
+                            {
+                                disabled = false;
+                                startMessage = "red";
+                                break;
+                            }
+                            else
+                            {
+                                bool complete = false;
+
+                                foreach (Answer a in q.Answer)
+                                {
+                                    if (a.Correct == true)
+                                    {
+                                        complete = true;
+                                    }
+                                }
+
+                                if (complete == true && q.Answer.Count() > 1)
+                                {
+                                    disabled = false;
+                                    startMessage = "green";
+                                }
+                                else
+                                {
+                                    disabled = false;
+                                    startMessage = "yellow";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                @if (startMessage == "red")
+                {
+                    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.PlayArrow" Color="Color.Error" Disabled="@disabled" OnClick="@(() => OpenExecutionPage(context, "red"))">Start</MudButton>
+                }
+                else if (startMessage == "yellow")
+                {
+                    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.PlayArrow" Color="Color.Warning" Disabled="@disabled" OnClick="@(() => OpenExecutionPage(context, "yellow"))">Start</MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" Disabled="@disabled" OnClick="@(() => OpenExecutionPage(context, "green"))">Start</MudButton>
+                }
+            </MudTd>
+            <MudTd DataLabel="Dashboard">
+                <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Dashboard" Color="Color.Dark" OnClick="@(() => OpenDashboardPage(context))">Dashboard</MudButton>
+            </MudTd>
             <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteTest(context))"></MudIconButton></MudTd>
         </RowTemplate>
     </MudTable>
@@ -48,6 +118,14 @@
 else if (notFound)
 {
     <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddTest" />
+}
+else if (noConnection)
+{
+    <p>You need a connection to the server to access this resource.</p>
+    <br />
+    <p>If you are already connected to the server and read this, you are not authorized to access this resource.</p>
+    <br />
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.ElectricalServices" Color="Color.Warning" OnClick="@(() => GoToLogin())">Try to connect to the server</MudButton>    
 }
 else
 {
@@ -59,19 +137,35 @@ else
 
 @code
 {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private AuthenticationState authState = null;
+    private System.Security.Claims.ClaimsPrincipal user = null;
+    private string userid = "";
+
     private List<Course> Courses;
     private List<Test> Tests;
+    private List<Input> Inputs;
     private Course cCourse;
     private Test cTest;
     private string SearchName = "";
     private string ErrorMessage = "";
     private string searchString = "";
     private bool notFound;
+    private bool noConnection;
+
+    private bool disabled = false;
+    private string startMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
         await GetCourses();
+        await GetInputs();
         await OnSelectedValue(0);
+
+        authState = await authenticationStateTask;
+        user = authState.User;
+        userid = $"{user.FindFirst(c => c.Type == "sub")?.Value}";
     }
 
     private async Task GetCourses()
@@ -85,9 +179,9 @@ else
                 Courses = result.ToList<Course>();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
         }
     }
 
@@ -104,9 +198,26 @@ else
 
             notFound = (Tests == null);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
+        }
+    }
+
+    private async Task GetInputs()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Input[]>("api/Input/GetAll/");
+
+            if (result != null)
+            {
+                Inputs = result.ToList<Input>();
+            }
+        }
+        catch (Exception)
+        {
+            noConnection = true;
         }
     }
 
@@ -138,6 +249,27 @@ else
         {
             await GetTests();
         }
+    }
+
+    private void OpenExecutionPage(Test tTest, string color)
+    {
+        if(color == "red")
+        {
+            Snackbar.Add("This test has no questions or not all questions have defined answers", Severity.Error);
+        }
+        else if(color == "yellow")
+        {
+            Snackbar.Add("Some questions have only one answer or no correct answer", Severity.Warning);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("exec/" + tTest.Id);
+        }
+    }
+
+    private void OpenDashboardPage(Test tTest)
+    {
+        NavigationManager.NavigateTo("dashboard/" + tTest.Id);
     }
 
     private async Task OnRowClick(TableRowClickEventArgs<Test> tTest)
@@ -179,5 +311,10 @@ else
         if ($"{element.Id}".Contains(searchString))
             return true;
         return false;
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("authentication/login");
     }
 }

@@ -1,0 +1,11 @@
+﻿@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/IdentityLayout.css" />
+
+<div class="body-without-menu">
+    @RenderBody()
+</div>
+
+@RenderSection("Scripts", required: false)

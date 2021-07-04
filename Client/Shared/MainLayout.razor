@@ -2,13 +2,15 @@
 
 @inherits LayoutComponentBase
 
-<div class="page">
+<div class="page vh-100">
 
-    @*<AuthorizeView>
-        <Authorized>*@
+    <AuthorizeView>
+        <Authorized>
             <MudLayout>
                 <MudAppBar Elevation="1" Dense="@dense">
                     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" @onclick="ToggleDrawer" />
+                    <MudAppBarSpacer />
+                    <MudDrawerContainer Class="sync-top"><SyncStatus /></MudDrawerContainer>
                     <MudAppBarSpacer />
                     <MudDrawerContainer><LoginDisplay /></MudDrawerContainer>
                 </MudAppBar>
@@ -18,11 +20,12 @@
                     </MudDrawerHeader>
                     <MudNavMenu>
                         <MudNavLink Href="/" Icon="@Icons.Filled.TableChart" Match="NavLinkMatch.All">Home</MudNavLink>
-                        <MudNavLink Href="/course" Icon="@Icons.Filled.AutoStories" Match="NavLinkMatch.All">Courses</MudNavLink>
-                        <MudNavLink Href="/test" Icon="@Icons.Filled.ListAlt" Match="NavLinkMatch.All">Tests</MudNavLink>
-                        <MudNavLink Href="/question" Icon="@Icons.Filled.LiveHelp" Match="NavLinkMatch.All">Questions</MudNavLink>
-                        <MudNavLink Href="/counter">Counter</MudNavLink>
-                        <MudNavLink Href="/fetchdata">Weather Forecast</MudNavLink>
+                        <MudNavGroup Title="Administration" Icon="@Icons.Filled.Settings" Expanded="true">
+                            <MudNavLink Href="/course" Icon="@Icons.Filled.AutoStories" Match="NavLinkMatch.All">Courses</MudNavLink>
+                            <MudNavLink Href="/test" Icon="@Icons.Filled.ListAlt" Match="NavLinkMatch.All">Tests</MudNavLink>
+                            <MudNavLink Href="/question" Icon="@Icons.Filled.LiveHelp" Match="NavLinkMatch.All">Questions</MudNavLink>
+                        </MudNavGroup>
+                        <MudNavLink Href="/overview" Icon="@Icons.Filled.Explore" Match="NavLinkMatch.All">Overview</MudNavLink>
                     </MudNavMenu>
                 </MudDrawer>
                 <MudMainContent Class="main">
@@ -30,15 +33,20 @@
                         @Body
                     </MudContainer>
                 </MudMainContent>
+                <footer class="sync-footer mud-appbar">
+                    <MudAppBarSpacer />
+                    <MudDrawerContainer><SyncStatus /></MudDrawerContainer>
+                    <MudAppBarSpacer />
+                </footer>
             </MudLayout>
-        @*</Authorized>*@
+        </Authorized>
 
-        @*<NotAuthorized>
+        <NotAuthorized>
             <div class="content px-4">
                 @Body
             </div>
-        </NotAuthorized>*@
-    @*</AuthorizeView>*@
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @code{
@@ -48,10 +56,10 @@
     {
         base.OnInitialized();
         var user = (await AuthStat).User;
-        //if (!user.Identity.IsAuthenticated)
-        //{
-        //    NavigationManager.NavigateTo($"authentication/login");
-        //}
+        if (!user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo($"authentication/login");
+        }
     }
 
     bool open = true;

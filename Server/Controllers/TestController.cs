@@ -23,10 +23,15 @@ namespace PWA_Project.Server.Controllers
             this.db = db;
         }
 
+        public IEnumerable<Test> NewData([FromQuery] int id)
+        {
+            return db.Test.Where(v => v.Id >= id);
+        }
+
         [HttpGet]
         public IEnumerable<Test> GetAll()
         {
-            return db.Test.Include(x => x.Question).OrderBy(x => x.Titel);
+            return db.Test.Include(x => x.Question).ThenInclude(x => x.Answer).OrderBy(x => x.Titel);
         }
 
         [HttpGet]
@@ -51,7 +56,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -68,7 +73,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);
@@ -87,7 +92,7 @@ namespace PWA_Project.Server.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // log exception here
                 return StatusCode(500);

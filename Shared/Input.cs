@@ -21,6 +21,9 @@ namespace PWA_Project.Shared
         [Required]
         public int AnswerId { get; set; }
 
+        [Required]
+        public string UserId { get; set; }
+
         public virtual Test Test { get; set; }
 
         public virtual Question Question { get; set; }

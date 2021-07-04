@@ -1,14 +1,12 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
 using MudBlazor.Services;
+using PWA_Project.Client.Data;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PWA_Project.Client
@@ -31,18 +29,18 @@ namespace PWA_Project.Client
                 config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
             });
 
-            builder.Services.AddSingleton(new HttpClient
-            {
-                BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
-            });
-
             builder.RootComponents.Add<App>("#app");
+            builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
-            //builder.Services.AddHttpClient("PWA_Project.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
-            //    .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+            builder.Services.AddHttpClient("PWA_Project.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+                .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+            builder.Services.AddScoped<LocalStore>();
 
             // Supply HttpClient instances that include access tokens when making requests to the server project
-            //builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("PWA_Project.ServerAPI"));
+            builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("PWA_Project.ServerAPI"));
+
+            builder.Services.AddScoped<AccountClaimsPrincipalFactory<RemoteUserAccount>, OfflineAccountClaimsPrincipalFactory>();
 
             builder.Services.AddApiAuthorization();
 

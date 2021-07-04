@@ -1,3 +1,5 @@
+@inject NavigationManager NavigationManager
+
 <MudThemeProvider Theme="CustomTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -16,7 +18,11 @@
                     }
                     else
                     {
-                        <p>You are not authorized to access this resource.</p>
+                        <p>You need a connection to the server to access this resource.</p>
+                        <br />
+                        <p>If you are already connected to the server and read this, you are not authorized to access this resource.</p>
+                        <br />
+                        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.ElectricalServices" Color="Color.Warning" OnClick="@(() => GoToLogin())">Try to connect to the server</MudButton>
                     }
                 </NotAuthorized>
             </AuthorizeRouteView>
@@ -39,4 +45,9 @@
             AppbarBackground = "#00be9b"
         }
     };
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("authentication/login");
+    }
 }

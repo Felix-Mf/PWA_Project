@@ -1,4 +1,5 @@
 @page "/question"
+@attribute [Authorize(Roles = "Admin")]
 
 @using PWA_Project.Shared
 @using System.Net.Http
@@ -39,7 +40,7 @@
             <MudTd DataLabel="Image">
                 @if (context.ImagePath != null && context.ImagePath != "")
                 {
-                    <img src="@(NavigationManager.BaseUri)Uploads/@context.ImagePath" alt="Image not found" style="max-width: 5rem;">
+                    <img src="/uploads/@context.ImagePath" alt="Image not found" style="max-width: 5rem;">
                 }
                 else
                 {
@@ -83,6 +84,14 @@ else if (notFound)
 {
     <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="@AddQuestion" />
 }
+else if (noConnection)
+{
+    <p>You need a connection to the server to access this resource.</p>
+    <br />
+    <p>If you are already connected to the server and read this, you are not authorized to access this resource.</p>
+    <br />
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.ElectricalServices" Color="Color.Warning" OnClick="@(() => GoToLogin())">Try to connect to the server</MudButton>    
+}
 else
 {
     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
@@ -102,6 +111,7 @@ else
     private string ErrorMessage = "";
     private string searchString = "";
     private bool notFound;
+    private bool noConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,9 +132,9 @@ else
                 Courses = result.ToList<Course>();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
         }
     }
 
@@ -139,9 +149,9 @@ else
                 Tests = result.ToList<Test>();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
         }
     }
 
@@ -158,9 +168,9 @@ else
 
             notFound = (Questions == null);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+            noConnection = true;
         }
     }
 
@@ -236,5 +246,10 @@ else
         if ($"{element.Id}".Contains(searchString))
             return true;
         return false;
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("authentication/login");
     }
 }

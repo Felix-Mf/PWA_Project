@@ -22,8 +22,6 @@ namespace PWA_Project.Shared
 
         public string ImagePath { get; set; }
 
-        public string VideoPath { get; set; }
-
         [Required]
         public int TestId { get; set; }
 

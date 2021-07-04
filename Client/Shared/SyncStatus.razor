@@ -1,0 +1,65 @@
+﻿@inject LocalStore LocalStore
+
+@if (isSynchronizing)
+{
+    <span>Updating...</span>
+}
+else if (lastSyncFailed)
+{
+    <span>Could not sync. Unsent edits: @outstandingLocalEdits</span>
+    <a class="toolbar-item toolbar-item-bg" @onclick="Synchronize">Retry</a>
+}
+else
+{
+    <span>Last updated: @GetLastUpdatedText()</span>
+    <a class="toolbar-item toolbar-item-bg" @onclick="Synchronize">Update</a>
+}
+
+@code {
+    bool isSynchronizing;
+    DateTime? lastUpdated;
+    int outstandingLocalEdits;
+    bool lastSyncFailed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Synchronize();
+    }
+
+    async Task Synchronize()
+    {
+        isSynchronizing = true;
+        lastSyncFailed = false;
+
+        try
+        {
+            await LocalStore.SynchronizeAsync();
+        }
+        catch (Exception)
+        {
+            lastSyncFailed = true;
+        }
+        finally
+        {
+            // Even if we weren't able to reach the server, we can update status based on local data
+            lastUpdated = await LocalStore.GetLastUpdateDateAsync();
+            outstandingLocalEdits = (await LocalStore.GetOutstandingLocalEditsAsyncInput()).Length;
+        }
+
+        isSynchronizing = false;
+    }
+
+    string GetLastUpdatedText()
+    {
+        if (lastUpdated.HasValue)
+        {
+            return lastUpdated.Value.Date == DateTime.Now.Date
+                ? lastUpdated.Value.ToLocalTime().ToShortTimeString()
+                : lastUpdated.Value.ToLocalTime().ToShortDateString();
+        }
+        else
+        {
+            return "Never";
+        }
+    }
+}

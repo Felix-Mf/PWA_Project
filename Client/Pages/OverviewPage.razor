@@ -1,0 +1,329 @@
+﻿@page "/overview"
+
+@using PWA_Project.Shared
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject LocalStore LocalStore
+
+@if(courseSelected == false) {
+    if (Courses != null)
+    {
+        <MudTable OnRowClick="@OnRowClick" T="Course" Items="@Courses" Hover="true" Filter="new Func<Course, bool>(FilterFuncCourse)">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Courses</MudText>
+                <MudToolBarSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>Titel</MudTh>
+                <MudTh>Description</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.Id</MudTd>
+                <MudTd DataLabel="Titel">@context.Titel</MudTd>
+                <MudTd DataLabel="Description">@context.Description</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+    else if (notFound)
+    {
+        <p>There is currently no course available.</p>
+    }
+    else
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7 top-loader" />
+    }
+}
+else
+{
+    <MudTable T="Test" Items="@Tests" Hover="true" Filter="new Func<Test, bool>(FilterFuncTest)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Tests</MudText>
+            <MudToolBarSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Titel</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Start Date</MudTh>
+            <MudTh>End Date</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Titel">@context.Titel</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd DataLabel="Start Date">@context.Date_min.Value.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="End Date">@context.Date_max.Value.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="Execution">
+                @if (context.Question.Count() == 0)
+                {
+                    disabled = false;
+                    startMessage = "red";
+                }
+                else
+                {
+                    if (Inputs.Find(item => item.TestId == context.Id && item.UserId == userid) != null)
+                    {
+                        disabled = true;
+                        startMessage = "";
+                    }
+                    else
+                    {
+                        foreach (Question q in context.Question)
+                        {
+
+                            if (q.Answer.Count() == 0)
+                            {
+                                disabled = false;
+                                startMessage = "red";
+                                break;
+                            }
+                            else
+                            {
+                                bool complete = false;
+
+                                foreach (Answer a in q.Answer)
+                                {
+                                    if (a.Correct == true)
+                                    {
+                                        complete = true;
+                                    }
+                                }
+
+                                if (complete == true && q.Answer.Count() > 1)
+                                {
+                                    disabled = false;
+                                    startMessage = "green";
+                                }
+                                else
+                                {
+                                    disabled = false;
+                                    startMessage = "yellow";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                @if (startMessage == "red")
+                {
+                    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.PlayArrow" Color="Color.Error" Disabled="@disabled" OnClick="@(() => OpenExecutionPage(context, "red"))">Start</MudButton>
+                }
+                else if (startMessage == "yellow")
+                {
+                    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.PlayArrow" Color="Color.Warning" Disabled="@disabled" OnClick="@(() => OpenExecutionPage(context, "yellow"))">Start</MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.PlayArrow" Color="Color.Success" Disabled="@disabled" OnClick="@(() => OpenExecutionPage(context, "green"))">Start</MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+    <br />
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.ArrowBack" Label="Back" OnClick="@GoBack" />
+}
+
+<br />
+<span style="color:red;">@ErrorMessage</span>
+
+@code
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private AuthenticationState authState = null;
+    private System.Security.Claims.ClaimsPrincipal user = null;
+    private string userid = "";
+
+    private List<Course> Courses;
+    private List<Test> Tests;
+    private List<Input> Inputs;
+    private List<Question> Questions;
+    private List<Answer> Answers;
+    private Course cCourse;
+    private string SearchName = "";
+    private string ErrorMessage = "";
+    private string searchString = "";
+    private bool notFound;
+    private bool courseSelected;
+    private bool disabled = false;
+    private string startMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCourses();
+        await GetInputs();
+
+        user = await LocalStore.LoadUserAccountAsync();
+        userid = $"{user.FindFirst(c => c.Type == "sub")?.Value}";
+    }
+
+    private async Task GetCourses()
+    {
+        try
+        {
+            var result = await LocalStore.GetCoursesAll();
+
+            if (result != null)
+            {
+                Courses = result.ToList<Course>();
+            }
+
+            notFound = (Courses == null);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task GetTests()
+    {
+        try
+        {
+            var result = await LocalStore.GetTestsAll();
+
+            if (result != null)
+            {
+                Tests = result.ToList<Test>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task GetInputs()
+    {
+        try
+        {
+            var result = await LocalStore.GetInputsAll();
+
+            if (result != null)
+            {
+                Inputs = result.ToList<Input>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task GetQuestions()
+    {
+        try
+        {
+            var result = await LocalStore.GetQuestionsAll();
+
+            if (result != null)
+            {
+                Questions = result.ToList<Question>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private async Task GetAnswers()
+    {
+        try
+        {
+            var result = await LocalStore.GetAnswersAll();
+
+            if (result != null)
+            {
+                Answers = result.ToList<Answer>();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private void OpenExecutionPage(Test tTest, string color)
+    {
+        if (color == "red")
+        {
+            Snackbar.Add("This test has no questions or not all questions have defined answers", Severity.Error);
+        }
+        else if (color == "yellow")
+        {
+            Snackbar.Add("Some questions have only one answer or no correct answer", Severity.Warning);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("exec/" + tTest.Id);
+        }
+    }
+
+    private async Task OnRowClick(TableRowClickEventArgs<Course> tCourse)
+    {
+        try
+        {
+            await GetTests();
+            Tests = Tests.Where(x => x.CourseId == tCourse.Item.Id).ToList();
+
+            await GetQuestions();
+            await GetAnswers();
+
+            foreach (Test t in Tests)
+            {
+                t.Question = Questions.Where(x => x.TestId == t.Id).ToList();
+
+                foreach (Question q in t.Question)
+                {
+                    q.Answer = Answers.Where(x => x.QuestionId == q.Id).ToList();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        courseSelected = true;
+    }
+
+    private void GoBack()
+    {
+        Tests = null;
+        courseSelected = false;
+    }
+
+    private bool FilterFuncCourse(Course element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Titel.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Id}".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    private bool FilterFuncTest(Test element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Titel.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Id}".Contains(searchString))
+            return true;
+        return false;
+    }
+}
