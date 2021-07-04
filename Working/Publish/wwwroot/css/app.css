@@ -1,0 +1,260 @@
+﻿html, body {
+    font-family: sans-serif !important;
+    background-color: var(--mud-palette-background-grey) !important;
+}
+
+.mud-main-content {
+    padding: 0;
+    margin-top: var(--mud-appbar-min-height);
+    height: calc(100vh - var(--mud-appbar-min-height));
+}
+
+.mud-container {
+    height: calc(100% - 20px);
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+.input-button {
+    width: 100%;
+}
+
+.mud-table-hover .mud-table-body .mud-table-row:hover {
+    cursor: pointer;
+}
+
+.mud-carousel-item {
+    padding: 0 3rem !important;
+}
+
+.mud-card-content {
+    max-height: 70vh !important;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+.selection {
+    background-color: green;
+    color: white;
+}
+
+.app-loader {
+    width: 100px;
+    height: 50px;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-left: -50px;
+    margin-top: -25px;
+}
+
+.top-loader {
+    position: absolute !important;
+    top: 36px;
+    width: 100%;
+    left: 0;
+}
+
+.mudblazor-appbar-band {
+    background-image: url(../images/MudAppbarCorner.svg);
+    background-repeat: no-repeat;
+    background-position: top right;
+    overflow: hidden;
+}
+
+progress {
+    width: 100% !important;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.pointer-event {
+    cursor: pointer;
+}
+
+.dropdown-menu, .card {
+    border: none !important;
+    box-shadow: 0 24px 54px rgb(0 0 0 / 15%), 0 4.5px 13.5px rgb(0 0 0 / 8%);
+    border-radius: .1rem !important;
+}
+
+.fa, .fas {
+    margin-right: 10px;
+}
+
+.toolbar-item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+    --toolbar-item-padding-horizontal: 0.75rem;
+    padding: 0.3rem 0.3rem;
+    color: var(--mud-palette-appbar-text);
+}
+
+.toolbar-item-bg {
+    background-color: var(--mud-palette-primary) !important;
+    color: var(--mud-palette-appbar-text);
+    border-radius: 0.5rem;
+}
+
+.sync-footer {
+    position: fixed !important;
+    bottom: env(safe-area-inset-bottom);
+    transform: translateY(env(safe-area-inset-bottom));
+    width: 100%;
+    background-color: var(--mud-palette-appbar-background);
+    color: var(--mud-palette-appbar-text);
+    height: calc(3rem + env(safe-area-inset-bottom));
+    padding: 0 1.25rem env(safe-area-inset-bottom) 1.25rem;
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+    flex-shrink: 0;
+    z-index: 1;
+    display: none !important;
+}
+
+.loader, .loader:before, .loader:after {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+}
+
+.loader {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    margin: auto;
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader:before {
+    border: 5px solid #aaa;
+    border-bottom: 5px solid black;
+    border-left: 5px solid black;
+    animation: spin1 2s linear infinite;
+}
+
+.loader:after {
+    border: 5px solid #aaa;
+    border-top: 5px solid transparent;
+    border-right: 5px solid transparent;
+    animation: spin2 2s linear infinite;
+}
+
+@keyframes spin1 {
+    20% {
+        transform: rotate(150deg)
+    }
+
+    40% {
+        transform: rotate(300deg)
+    }
+
+    80% {
+        transform: rotate(300deg)
+    }
+
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes spin2 {
+    0% {
+        transform: rotate(-30deg)
+    }
+
+    20% {
+        transform: rotate(-30deg);
+        border-color: transparent transparent #aaa #aaa
+    }
+
+    21% {
+        border-color: black black transparent transparent
+    }
+
+    40% {
+        transform: rotate(-30deg)
+    }
+
+    60% {
+        transform: rotate(120deg);
+        border-color: black black transparent transparent
+    }
+
+    61% {
+        border-color: transparent transparent #aaa #aaa
+    }
+
+    80% {
+        transform: rotate(270deg)
+    }
+
+    100% {
+        transform: rotate(330deg);
+    }
+}
+
+@media (max-width: 769px) {
+    .sync-footer {
+        display: flex !important;
+    }
+
+    .sync-top {
+        display: none !important;
+    }
+
+    .mud-button-filled-size-large {
+        font-size: 0.6rem !important;
+    }
+}
