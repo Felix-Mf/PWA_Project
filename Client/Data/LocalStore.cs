@@ -18,6 +18,7 @@ namespace PWA_Project.Client.Data
         private readonly HttpClient httpClient;
         private readonly IJSRuntime js;
         private int count = 0;
+        private int editsCount = 1;
 
         public LocalStore(HttpClient httpClient, IJSRuntime js)
         {
@@ -34,9 +35,11 @@ namespace PWA_Project.Client.Data
         {
             (await httpClient.GetAsync("api/course/getall")).EnsureSuccessStatusCode();
 
+            editsCount = (await GetOutstandingLocalEditsAsyncInput()).Length - 1;
+
             foreach (var editedInput in await GetOutstandingLocalEditsAsyncInput())
             {
-                if (count > 1)
+                if (count > editsCount)
                 {
                     var tempId = editedInput.Id;
 
